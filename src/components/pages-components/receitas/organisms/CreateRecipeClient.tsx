@@ -1,10 +1,12 @@
-"use client"
-import React, { useRef, useState, useEffect } from 'react'
+﻿"use client"
+import { useEffect, useRef, useState } from 'react'
+import type { ChangeEventHandler } from 'react'
 import Image from 'next/image'
 import Button from '@/components/atoms/Button'
 import { Upload } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@/hooks/UserContext'
+import { fetchJson } from '@/lib/fetch-json'
 
 export default function CreateRecipeClient() {
     const fileRef = useRef<HTMLInputElement | null>(null)
@@ -23,7 +25,7 @@ export default function CreateRecipeClient() {
 
     const openFile = () => fileRef.current?.click()
 
-    const onFile: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const onFile: ChangeEventHandler<HTMLInputElement> = (e) => {
         const file = e.target.files?.[0]
         if (!file) return
         if (preview) URL.revokeObjectURL(preview)
@@ -32,42 +34,31 @@ export default function CreateRecipeClient() {
 
     const handleSubmit = async () => {
         if (loading) return
-        
+
         const form = formRef.current
         if (!form) return
-        
+
         if (!user?.id) {
             setError('Usuário não identificado. Faça login novamente.')
             return
         }
-        
+
         const formData = new FormData(form)
         formData.append('authorId', String(user.id))
-        
+
         const imageFile = fileRef.current?.files?.[0]
         if (imageFile) {
             formData.append('imagem', imageFile)
         }
-        
+
         setLoading(true)
         setError('')
-        
+
         try {
-            const response = await fetch('/api/receitas', {
-                method: 'POST',
-                body: formData
-            })
-            
-            const result = await response.json()
-            
-            if (!response.ok) {
-                setError(result.message || 'Erro ao criar receita')
-                return
-            }
-            
+            await fetchJson('/api/receitas', { method: 'POST', body: formData }, 'Erro ao criar receita')
             router.push('/')
         } catch (err) {
-            setError('Erro de rede. Tente novamente.')
+            setError(err instanceof Error ? err.message : 'Erro de rede. Tente novamente.')
             console.error('Falha na criação da receita:', err)
         } finally {
             setLoading(false)
@@ -101,7 +92,7 @@ export default function CreateRecipeClient() {
                 <div className="flex flex-col gap-6 w-full lg:w-[55%]">
                     <section className="rounded-xl overflow-hidden relative bg-placeholder border-2 border-foreground">
                         <input ref={fileRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
-                        
+
                         {preview && (
                             <div className="absolute inset-0">
                                 <Image

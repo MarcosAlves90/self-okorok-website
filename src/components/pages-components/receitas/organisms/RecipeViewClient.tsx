@@ -1,5 +1,5 @@
-'use client'
-import React, { useState, useEffect } from 'react'
+﻿'use client'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -8,21 +8,8 @@ import RecipeViewSkeleton from '../molecules/RecipeViewSkeleton'
 import LikeButton from '../molecules/LikeButton'
 import BookmarkButton from '../molecules/BookmarkButton'
 import BackLink from '../atoms/BackLink'
-
-interface Recipe {
-    id: number
-    titulo: string
-    ingredientes: string
-    modo: string
-    tempo?: string | null
-    rendimento?: string | null
-    categoria?: string | null
-    observacoes?: string | null
-    imagemUrl?: string | null
-    authorId: number | null
-    authorName?: string
-    createdAt: string | null
-}
+import type { Recipe } from '@/types/recipe'
+import { fetchJson } from '@/lib/fetch-json'
 
 export default function RecipeViewClient() {
     const params = useParams()
@@ -31,32 +18,21 @@ export default function RecipeViewClient() {
     const [error, setError] = useState<string>('')
 
     useEffect(() => {
+        const recipeId = Array.isArray(params.id) ? params.id[0] : params.id
+
         const fetchRecipe = async () => {
             try {
-                const response = await fetch(`/api/receitas/${params.id}`)
-
-                if (!response.ok) {
-                    setError('Receita não encontrada')
-                    return
-                }
-
-                const result = await response.json()
-
-                if (!result.success) {
-                    setError(result.message || 'Receita não encontrada')
-                    return
-                }
-
-                setRecipe(result.data)
+                const result = await fetchJson<Recipe>(`/api/receitas/${recipeId}`, undefined, 'Receita não encontrada')
+                setRecipe(result.data || null)
             } catch (err) {
-                setError('Erro ao carregar receita')
+                setError(err instanceof Error ? err.message : 'Erro ao carregar receita')
                 console.error('Erro ao buscar receita:', err)
             } finally {
                 setLoading(false)
             }
         }
 
-        if (params.id) {
+        if (recipeId) {
             fetchRecipe()
         }
     }, [params.id])
@@ -147,9 +123,9 @@ export default function RecipeViewClient() {
                                 )}
                             </div>
 
-                            {recipe.authorName && (
+                            {recipe.authorName && recipe.authorId && (
                                 <Link className="w-full text-xs text-background/70 mt-2 hover:underline" href={`/usuarios/${recipe.authorId}`}>
-                                    Por: {recipe.authorName}                                
+                                    Por: {recipe.authorName}
                                 </Link>
                             )}
                         </div>

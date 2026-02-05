@@ -64,7 +64,8 @@ export function clearAuthCookie(response: NextResponse) {
 }
 
 export async function getAuthUserId() {
-    const token = cookies().get(COOKIE_NAME)?.value
+    const cookieStore = await cookies()
+    const token = cookieStore.get(COOKIE_NAME)?.value
     if (!token) return null
     const payload = await verifyAuthToken(token)
     if (!payload?.sub) return null

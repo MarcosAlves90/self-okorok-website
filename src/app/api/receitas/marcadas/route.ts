@@ -1,45 +1,34 @@
-import { NextResponse } from 'next/server';
-import { query } from '@/lib/database';
-
-const json = (body: unknown, status = 200) => NextResponse.json(body, { status });
+﻿import { query } from '@/lib/database'
+import { assertParam, ensureUserExists, handleApiError, success } from '@/lib/api-utils'
 
 const MSG = {
     SUCCESS: 'Receitas marcadas obtidas com sucesso',
     INVALID_USER_ID: 'ID do usuário é obrigatório',
     USER_NOT_FOUND: 'Usuário não encontrado',
     SERVER_ERROR: 'Erro interno do servidor',
-} as const;
+} as const
 
 interface DatabaseRecipe {
-    id: number | string;
-    titulo: string;
-    ingredientes: string;
-    modo: string;
-    tempo?: string | null;
-    rendimento?: string | null;
-    categoria?: string | null;
-    observacoes?: string | null;
-    imagem_url?: string | null;
-    author_id?: string | null;
-    created_at?: string;
+    id: number | string
+    titulo: string
+    ingredientes: string
+    modo: string
+    tempo?: string | null
+    rendimento?: string | null
+    categoria?: string | null
+    observacoes?: string | null
+    imagem_url?: string | null
+    author_id?: string | null
+    created_at?: string
 }
 
 export async function GET(request: Request) {
     try {
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get('userId');
+        const { searchParams } = new URL(request.url)
+        const userId = assertParam(searchParams.get('userId'), MSG.INVALID_USER_ID)
 
-        if (!userId) {
-            return json({ success: false, message: MSG.INVALID_USER_ID }, 400);
-        }
+        await ensureUserExists(userId, MSG.USER_NOT_FOUND)
 
-        // Verificar se o usuário existe
-        const userCheck = await query('SELECT id FROM users WHERE id = $1', [userId]);
-        if (!userCheck.rows || userCheck.rows.length === 0) {
-            return json({ success: false, message: MSG.USER_NOT_FOUND }, 404);
-        }
-
-        // Buscar receitas marcadas pelo usuário
         const queryText = `
             SELECT 
                 r.id, r.titulo, r.ingredientes, r.modo, r.tempo, 
@@ -49,9 +38,9 @@ export async function GET(request: Request) {
             INNER JOIN marcados m ON r.id = m.receita_id
             WHERE m.user_id = $1
             ORDER BY m.created_at DESC
-        `;
+        `
 
-        const result = await query(queryText, [userId]);
+        const result = await query(queryText, [userId])
 
         const receitas = result.rows.map((r: DatabaseRecipe) => ({
             id: r.id,
@@ -65,16 +54,10 @@ export async function GET(request: Request) {
             imagemUrl: r.imagem_url || null,
             authorId: r.author_id || null,
             createdAt: r.created_at || null,
-        }));
+        }))
 
-        return json({ 
-            success: true, 
-            message: MSG.SUCCESS,
-            data: receitas 
-        });
-
+        return success(receitas, MSG.SUCCESS)
     } catch (error) {
-        console.error('Erro na rota GET /api/receitas/marcadas:', error);
-        return json({ success: false, message: MSG.SERVER_ERROR }, 500);
+        return handleApiError(error, MSG.SERVER_ERROR, 'Erro na rota GET /api/receitas/marcadas:')
     }
 }

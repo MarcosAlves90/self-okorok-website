@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import AvatarDisplay from '@/components/atoms/AvatarDisplay'
@@ -6,8 +6,18 @@ import { Save, LogOut } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useUser } from '@/hooks/UserContext'
 import { useRouter } from 'next/navigation'
+import { fetchJson } from '@/lib/fetch-json'
 
 type Props = { className?: string }
+
+type UserPayload = {
+    id: string | number
+    name: string
+    email: string
+    avatarUrl?: string | null
+    bio?: string | null
+    createdAt: string
+}
 
 export default function ProfileEditor({ className = '' }: Props) {
     const [name, setName] = useState('Usuário')
@@ -42,14 +52,16 @@ export default function ProfileEditor({ className = '' }: Props) {
         }
         setIsLoading(true)
         try {
-            const response = await fetch(`/api/usuarios/${userId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bio }),
-            })
-            if (!response.ok) throw new Error('Erro ao salvar bio')
-            const data = await response.json()
-            if (data.success && data.data) setUser(data.data)
+            const data = await fetchJson<UserPayload>(
+                `/api/usuarios/${userId}`,
+                {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bio }),
+                },
+                'Erro ao salvar bio'
+            )
+            if (data.data) setUser(data.data)
         } catch (error) {
             console.error('Erro ao salvar bio:', error)
         } finally {

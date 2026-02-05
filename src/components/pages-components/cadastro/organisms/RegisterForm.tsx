@@ -1,15 +1,13 @@
+﻿'use client';
 
-'use client';
-
-
-import { useState, useEffect, FormEvent } from 'react';
+import { useEffect, useState, FormEvent } from 'react';
 import PasswordInput from '@/components/atoms/PasswordInput';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/atoms/Button';
 import Link from 'next/link';
 import AvatarInput from '../molecules/AvatarInput';
 import { useUser } from '@/hooks/UserContext';
-
+import { fetchJson } from '@/lib/fetch-json';
 
 export default function RegisterForm() {
     const [password, setPassword] = useState('');
@@ -39,15 +37,10 @@ export default function RegisterForm() {
         setError('');
         setLoading(true);
         try {
-            const res = await fetch('/api/usuarios', { method: 'POST', body: form });
-            const json = await res.json().catch(() => null);
-            if (!res.ok) {
-                setError(json?.message ?? 'Erro ao cadastrar');
-                return;
-            }
+            await fetchJson('/api/usuarios', { method: 'POST', body: form }, 'Erro ao cadastrar');
             router.push('/login');
-        } catch {
-            setError('Erro de rede');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Erro de rede');
         } finally {
             setLoading(false);
         }

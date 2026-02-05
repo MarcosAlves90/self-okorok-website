@@ -1,20 +1,27 @@
+﻿'use client';
 
-'use client';
-
-
-import React, { useState, useEffect, FormEvent } from 'react';
+import { useEffect, useState, FormEvent } from 'react';
+import type { ChangeEvent } from 'react';
 import Button from '@/components/atoms/Button';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useUser } from '@/hooks/UserContext';
 import PasswordInput from '@/components/atoms/PasswordInput';
-
+import { fetchJson } from '@/lib/fetch-json';
 
 type FormState = {
     email: string;
     password: string;
 };
 
+type LoginResponse = {
+    id: string | number;
+    name: string;
+    email: string;
+    avatarUrl?: string | null;
+    bio?: string | null;
+    createdAt: string;
+};
 
 export default function LoginForm() {
     const [form, setForm] = useState<FormState>({ email: '', password: '' });
@@ -27,7 +34,7 @@ export default function LoginForm() {
         if (user) router.push('/perfil');
     }, [user, router]);
 
-    function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    function handleChange(e: ChangeEvent<HTMLInputElement>) {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     }
 
@@ -36,20 +43,19 @@ export default function LoginForm() {
         setError('');
         setLoading(true);
         try {
-            const res = await fetch('/api/usuarios/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form),
-            });
-            const json = await res.json().catch(() => null);
-            if (!res.ok) {
-                setError(json?.message ?? 'Erro ao autenticar');
-                return;
-            }
-            setUser(json.data);
+            const json = await fetchJson<LoginResponse>(
+                '/api/usuarios/login',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(form),
+                },
+                'Erro ao autenticar'
+            );
+            setUser(json.data || null);
             router.push('/perfil');
-        } catch {
-            setError('Erro de rede');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Erro de rede');
         } finally {
             setLoading(false);
         }

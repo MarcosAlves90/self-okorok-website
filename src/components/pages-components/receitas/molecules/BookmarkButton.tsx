@@ -1,12 +1,17 @@
-'use client'
-import React, { useState, useEffect } from 'react'
+﻿'use client'
+import { useEffect, useState } from 'react'
 import { Bookmark } from 'lucide-react'
 import { useUser } from '@/hooks/UserContext'
+import { fetchJson } from '@/lib/fetch-json'
 
 interface BookmarkButtonProps {
-    recipeId: number
+    recipeId: string
     className?: string
 }
+
+type BookmarkStatusResponse = { hasBookmarked: boolean }
+
+type BookmarkCountResponse = { total: number }
 
 export default function BookmarkButton({ recipeId, className = "" }: BookmarkButtonProps) {
     const { user } = useUser()
@@ -16,36 +21,52 @@ export default function BookmarkButton({ recipeId, className = "" }: BookmarkBut
     const [isFetching, setIsFetching] = useState(true)
 
     useEffect(() => {
+        const controller = new AbortController()
+
         const fetchBookmarkData = async () => {
             setIsFetching(true)
             try {
                 const userId = user?.id ? String(user.id) : undefined
 
-                if (userId) {
-                    const userBookmarkResponse = await fetch(`/api/marcados?receitaId=${recipeId}&userId=${userId}`)
-                    if (userBookmarkResponse.ok) {
-                        const userBookmarkResult = await userBookmarkResponse.json()
-                        if (userBookmarkResult.success) {
-                            setIsBookmarked(userBookmarkResult.data.hasBookmarked)
-                        }
-                    }
+                const totalPromise = fetchJson<BookmarkCountResponse>(
+                    `/api/marcados?receitaId=${recipeId}`,
+                    { signal: controller.signal },
+                    'Erro ao carregar favoritos'
+                )
+
+                const statusPromise = userId
+                    ? fetchJson<BookmarkStatusResponse>(
+                        `/api/marcados?receitaId=${recipeId}&userId=${userId}`,
+                        { signal: controller.signal },
+                        'Erro ao carregar favoritos'
+                    )
+                    : Promise.resolve(null)
+
+                const [totalResult, statusResult] = await Promise.all([totalPromise, statusPromise])
+
+                if (statusResult?.data) {
+                    setIsBookmarked(statusResult.data.hasBookmarked)
                 }
 
-                const totalBookmarksResponse = await fetch(`/api/marcados?receitaId=${recipeId}`)
-                if (totalBookmarksResponse.ok) {
-                    const totalBookmarksResult = await totalBookmarksResponse.json()
-                    if (totalBookmarksResult.success) {
-                        setBookmarksCount(totalBookmarksResult.data.total)
-                    }
+                if (totalResult?.data) {
+                    setBookmarksCount(totalResult.data.total)
                 }
             } catch (err) {
-                console.error('Problema ao carregar status de marcação:', err)
+                if (!controller.signal.aborted) {
+                    console.error('Problema ao carregar status de marcação:', err)
+                }
             } finally {
-                setIsFetching(false)
+                if (!controller.signal.aborted) {
+                    setIsFetching(false)
+                }
             }
         }
 
         fetchBookmarkData()
+
+        return () => {
+            controller.abort()
+        }
     }, [recipeId, user?.id])
 
     const handleBookmark = async () => {
@@ -54,22 +75,21 @@ export default function BookmarkButton({ recipeId, className = "" }: BookmarkBut
         setLoading(true)
         try {
             const method = isBookmarked ? 'DELETE' : 'POST'
-            const response = await fetch('/api/marcados', {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: String(user.id),
-                    receitaId: String(recipeId)
-                })
-            })
+            await fetchJson(
+                '/api/marcados',
+                {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: String(user.id),
+                        receitaId: String(recipeId)
+                    })
+                },
+                'Erro ao atualizar favoritos'
+            )
 
-            if (response.ok) {
-                const result = await response.json()
-                if (result.success) {
-                    setIsBookmarked(!isBookmarked)
-                    setBookmarksCount(prev => isBookmarked ? prev - 1 : prev + 1)
-                }
-            }
+            setIsBookmarked(!isBookmarked)
+            setBookmarksCount(prev => isBookmarked ? prev - 1 : prev + 1)
         } catch (err) {
             console.error('Não foi possível marcar/desmarcar receita:', err)
         } finally {
@@ -92,8 +112,8 @@ export default function BookmarkButton({ recipeId, className = "" }: BookmarkBut
                 onClick={handleBookmark}
                 disabled={loading}
                 className={`flex items-center cursor-pointer gap-2 px-3 py-2 rounded-md transition-colors ${
-                    isBookmarked 
-                        ? 'bg-blue-500 text-white' 
+                    isBookmarked
+                        ? 'bg-blue-500 text-white'
                         : 'bg-background text-foreground hover:bg-background/60'
                 } disabled:opacity-50 ${className}`}>
                 <Bookmark strokeWidth={3} className={`h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} />

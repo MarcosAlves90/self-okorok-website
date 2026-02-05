@@ -1,12 +1,17 @@
-"use client"
-import React, { useState, useEffect } from 'react'
+﻿"use client"
+import { useEffect, useState } from 'react'
 import { Heart } from 'lucide-react'
 import { useUser } from '@/hooks/UserContext'
+import { fetchJson } from '@/lib/fetch-json'
 
 interface LikeButtonProps {
-    recipeId: number
+    recipeId: string
     className?: string
 }
+
+type LikeStatusResponse = { hasLiked: boolean }
+
+type LikeCountResponse = { total: number }
 
 export default function LikeButton({ recipeId, className = "" }: LikeButtonProps) {
     const { user } = useUser()
@@ -16,36 +21,52 @@ export default function LikeButton({ recipeId, className = "" }: LikeButtonProps
     const [isFetching, setIsFetching] = useState(true)
 
     useEffect(() => {
+        const controller = new AbortController()
+
         const fetchLikeData = async () => {
             setIsFetching(true)
             try {
                 const userId = user?.id ? String(user.id) : undefined
 
-                if (userId) {
-                    const userLikeResponse = await fetch(`/api/curtidas?receitaId=${recipeId}&userId=${userId}`)
-                    if (userLikeResponse.ok) {
-                        const userLikeResult = await userLikeResponse.json()
-                        if (userLikeResult.success) {
-                            setIsLiked(userLikeResult.data.hasLiked)
-                        }
-                    }
+                const totalPromise = fetchJson<LikeCountResponse>(
+                    `/api/curtidas?receitaId=${recipeId}`,
+                    { signal: controller.signal },
+                    'Erro ao carregar curtidas'
+                )
+
+                const statusPromise = userId
+                    ? fetchJson<LikeStatusResponse>(
+                        `/api/curtidas?receitaId=${recipeId}&userId=${userId}`,
+                        { signal: controller.signal },
+                        'Erro ao carregar curtidas'
+                    )
+                    : Promise.resolve(null)
+
+                const [totalResult, statusResult] = await Promise.all([totalPromise, statusPromise])
+
+                if (statusResult?.data) {
+                    setIsLiked(statusResult.data.hasLiked)
                 }
 
-                const totalLikesResponse = await fetch(`/api/curtidas?receitaId=${recipeId}`)
-                if (totalLikesResponse.ok) {
-                    const totalLikesResult = await totalLikesResponse.json()
-                    if (totalLikesResult.success) {
-                        setLikesCount(totalLikesResult.data.total)
-                    }
+                if (totalResult?.data) {
+                    setLikesCount(totalResult.data.total)
                 }
             } catch (err) {
-                console.error('Falha ao carregar dados de curtida:', err)
+                if (!controller.signal.aborted) {
+                    console.error('Falha ao carregar dados de curtida:', err)
+                }
             } finally {
-                setIsFetching(false)
+                if (!controller.signal.aborted) {
+                    setIsFetching(false)
+                }
             }
         }
 
         fetchLikeData()
+
+        return () => {
+            controller.abort()
+        }
     }, [recipeId, user?.id])
 
     const handleLike = async () => {
@@ -54,22 +75,21 @@ export default function LikeButton({ recipeId, className = "" }: LikeButtonProps
         setLoading(true)
         try {
             const method = isLiked ? 'DELETE' : 'POST'
-            const response = await fetch('/api/curtidas', {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: String(user.id),
-                    receitaId: String(recipeId)
-                })
-            })
+            await fetchJson(
+                '/api/curtidas',
+                {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: String(user.id),
+                        receitaId: String(recipeId)
+                    })
+                },
+                'Erro ao atualizar curtida'
+            )
 
-            if (response.ok) {
-                const result = await response.json()
-                if (result.success) {
-                    setIsLiked(!isLiked)
-                    setLikesCount(prev => isLiked ? prev - 1 : prev + 1)
-                }
-            }
+            setIsLiked(!isLiked)
+            setLikesCount(prev => isLiked ? prev - 1 : prev + 1)
         } catch (err) {
             console.error('Falha na operação de curtir:', err)
         } finally {
@@ -92,8 +112,8 @@ export default function LikeButton({ recipeId, className = "" }: LikeButtonProps
                 onClick={handleLike}
                 disabled={loading}
                 className={`flex items-center cursor-pointer gap-2 px-3 py-2 rounded-md transition-colors ${
-                    isLiked 
-                        ? 'bg-red-500 text-white' 
+                    isLiked
+                        ? 'bg-red-500 text-white'
                         : 'bg-background text-foreground hover:bg-background/30'
                 } disabled:opacity-50 ${className}`}>
                 <Heart strokeWidth={3} className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />

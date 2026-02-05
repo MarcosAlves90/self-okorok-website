@@ -61,12 +61,12 @@ export default function MostVoted(): React.ReactElement {
 
     if (loading) {
         return (
-            <section id="mais-votadas" className="px-(--pc-padding) py-15 space-y-10">
-                <h2 className="font-protest-strike text-foreground text-5xl flex items-center gap-3">
+            <section id="mais-votadas" className="px-[var(--pc-padding)] py-15 space-y-10">
+                <h2 className="font-protest-strike text-foreground text-3xl sm:text-4xl lg:text-5xl flex items-center gap-3">
                     <span>As Mais Votadas</span>
-                    <Star className="w-11 h-11 text-foreground fill-current" aria-hidden="true" stroke="none" fill="currentColor" />
+                    <Star className="w-7 h-7 sm:w-9 sm:h-9 lg:w-11 lg:h-11 text-foreground fill-current" aria-hidden="true" stroke="none" fill="currentColor" />
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
                     {Array.from({ length: 6 }).map((_, index) => (
                         <MostVotedCardSkeleton key={index} />
                     ))}
@@ -76,13 +76,13 @@ export default function MostVoted(): React.ReactElement {
     }
 
     return (
-        <section id="mais-votadas" className="px-(--pc-padding) py-15 space-y-10">
-            <h2 className="font-protest-strike text-foreground text-5xl flex items-center gap-3">
+        <section id="mais-votadas" className="px-[var(--pc-padding)] py-15 space-y-10">
+            <h2 className="font-protest-strike text-foreground text-3xl sm:text-4xl lg:text-5xl flex items-center gap-3">
                 <span>As Mais Votadas</span>
-                <Star className="w-11 h-11 text-foreground fill-current" aria-hidden="true" stroke="none" fill="currentColor" />
+                <Star className="w-7 h-7 sm:w-9 sm:h-9 lg:w-11 lg:h-11 text-foreground fill-current" aria-hidden="true" stroke="none" fill="currentColor" />
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
                 {recipes.map((item) => (
                     <MostVotedCard key={item.id} imageSrc={item.image} title={item.title} href={item.href} />
                 ))}

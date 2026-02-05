@@ -17,7 +17,7 @@ const FILTERS = [
 
 export default function FilterSidebar(): React.ReactElement {
     return (
-        <aside className="bg-[#8a3b1a] rounded-lg text-sm text-white flex flex-col" style={{ height: 640 }}>
+        <aside className="bg-[#8a3b1a] rounded-lg text-sm text-white flex flex-col h-auto max-h-[70vh] lg:h-[40rem] lg:max-h-none">
             <SidebarHeader />
             <div className="space-y-6 px-5 overflow-y-auto flex-1">
                 {FILTERS.map((filter) => (

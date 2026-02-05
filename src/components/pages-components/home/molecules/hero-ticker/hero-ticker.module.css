@@ -13,7 +13,7 @@
 
 .track {
     display: flex;
-    gap: var(--gap);
+    gap: clamp(1.5rem, 4vw, var(--gap));
     align-items: center;
     white-space: nowrap;
     will-change: transform;
@@ -23,7 +23,7 @@
 .item {
     display: inline-block;
     padding: 0 0.5rem;
-    font-size: 1.125rem;
+    font-size: clamp(0.875rem, 1.6vw, 1.125rem);
 }
 
 @keyframes scroll {

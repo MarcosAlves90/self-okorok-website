@@ -17,22 +17,26 @@
     "cloudinary": "^2.7.0",
     "dotenv": "^17.2.1",
     "lucide-react": "^0.539.0",
-    "next": "15.4.6",
+    "next": "15.5.12",
     "pg": "^8.16.3",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
     "resend": "^6.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "19.2.11",
+    "@types/react-dom": "19.2.3",
     "eslint": "^9",
-    "eslint-config-next": "15.4.6",
+    "eslint-config-next": "15.5.12",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39"
+  "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39",
+  "overrides": {
+    "@types/react": "19.2.11",
+    "@types/react-dom": "19.2.3"
+  }
 }

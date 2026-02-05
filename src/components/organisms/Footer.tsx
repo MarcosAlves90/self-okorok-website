@@ -41,8 +41,8 @@ export default function Footer(): React.ReactElement {
 
     return (
         <footer className="bg-foreground text-background" role="contentinfo">
-            <div className="py-2 px-(--pc-padding) border-b-2 border-background">
-                <div className="flex items-center justify-between">
+            <div className="py-2 px-[var(--pc-padding)] border-b-2 border-background">
+                <div className="flex flex-row items-center justify-between gap-4">
                     <Link href="/" aria-label="Ir para a página inicial" className="flex items-center cursor-pointer gap-3">
                         <Image src="/logo.png" alt="Logotipo Okorok" width={56} height={56} className="h-full w-auto object-contain" priority />
                         <div className="hidden sm:flex flex-col leading-tight">
@@ -51,15 +51,15 @@ export default function Footer(): React.ReactElement {
                         </div>
                     </Link>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 w-auto">
                         <Link href="/ajuda">
-                            <Button type="button" size="md" aria-label="Ir para página de ajuda">Preciso de ajuda</Button>
+                            <Button type="button" size="md" aria-label="Ir para a página de ajuda">Preciso de ajuda</Button>
                         </Link>
                     </div>
                 </div>
             </div>
 
-            <div className="px-(--pc-padding) mx-auto py-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="px-[var(--pc-padding)] mx-auto py-6 grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <h4 className="mb-2 font-medium flex items-center justify-between">
                         <span>Navegação</span>
@@ -83,7 +83,7 @@ export default function Footer(): React.ReactElement {
                         onSubmit={(e: FormEvent) => {
                             e.preventDefault();
                         }}
-                        className="flex gap-2 items-center"
+                        className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center"
                         aria-label="Formulário de inscrição na newsletter"
                     >
                         <label htmlFor="footer-newsletter" className="sr-only">E-mail</label>
@@ -93,7 +93,7 @@ export default function Footer(): React.ReactElement {
                             type="email"
                             placeholder="seu@email.com"
                             required
-                            className="rounded-md px-3 py-2 text-sm bg-transparent border-2 border-background/20 focus:outline-none focus:border-background"
+                            className="rounded-md px-3 py-2 text-sm bg-transparent border-2 border-background/20 focus:outline-none focus:border-background w-full sm:w-auto"
                         />
                         <Button type="submit" size="sm">Assinar</Button>
                     </form>
@@ -124,7 +124,7 @@ export default function Footer(): React.ReactElement {
             </div>
 
             <div className="border-t-2 border-background/20 py-5">
-                <div className="px-(--pc-padding) mx-auto text-sm flex flex-col md:flex-row items-center justify-between gap-2">
+                <div className="px-[var(--pc-padding)] mx-auto text-sm flex flex-col md:flex-row items-center justify-between gap-2 text-center md:text-left">
                     <span>© {year} Okorok. Todos os direitos reservados.</span>
                     <div className="flex items-center gap-4">
                         <Link href="/privacidade" className="text-sm hover:underline">Privacidade</Link>

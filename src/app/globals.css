@@ -11,10 +11,10 @@ html {
   --background-gray: #CBC9BD;
   --placeholder: #a66b58;
 
-  --pc-padding: calc(var(--spacing) * 35);
+  --pc-padding: clamp(1.25rem, 4vw, calc(var(--spacing) * 35));
 
   /* Hero ticker variables */
-  --ticker-height: 3rem;
+  --ticker-height: clamp(2.25rem, 5vw, 3rem);
   --gap: 3rem;
   --duration: 40s;
 

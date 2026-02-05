@@ -1,13 +1,13 @@
-﻿import { query } from '@/lib/database'
+import { query } from '@/lib/database'
 import { uploadImage } from '@/lib/uploadImage'
-import { assertString, handleApiError, success, failure } from '@/lib/api-utils'
+import { handleApiError, success, failure } from '@/lib/api-utils'
+import { ensureSameUser, requireAuthUserId } from '@/lib/auth'
 
 const MSG = {
     SUCCESS: 'Receita criada com sucesso',
     INVALID_TITLE: 'Título é obrigatório e deve ter pelo menos 2 caracteres',
     INVALID_INGREDIENTS: 'Ingredientes são obrigatórios e devem ter pelo menos 3 caracteres',
     INVALID_INSTRUCTIONS: 'Modo de preparo é obrigatório e deve ter pelo menos 3 caracteres',
-    INVALID_AUTHOR: 'Author ID é obrigatório',
     INVALID_IMAGE: 'Falha ao processar imagem',
     SERVER_ERROR: 'Erro interno do servidor',
 } as const
@@ -68,6 +68,7 @@ export async function GET(request: Request) {
         const queryParams: string[] = []
 
         if (userId) {
+            await ensureSameUser(userId)
             queryText += ' WHERE author_id = $1'
             queryParams.push(userId)
         }
@@ -120,7 +121,10 @@ export async function POST(request: Request) {
             return failure(MSG.INVALID_INSTRUCTIONS, 400)
         }
 
-        const authorIdValue = assertString(authorId, MSG.INVALID_AUTHOR)
+        const authUserId = await requireAuthUserId()
+        if (authorId) {
+            await ensureSameUser(authorId)
+        }
 
         let imagemUrl: string | null = null
         if (imagemFile) {
@@ -134,7 +138,7 @@ export async function POST(request: Request) {
 
         const res = await query(
             `INSERT INTO receitas (titulo, ingredientes, modo, tempo, rendimento, categoria, observacoes, imagem_url, author_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id, titulo, ingredientes, modo, tempo, rendimento, categoria, observacoes, imagem_url, created_at`,
-            [titulo, ingredientes, modo, tempo, rendimento, categoria, observacoes, imagemUrl, authorIdValue]
+            [titulo, ingredientes, modo, tempo, rendimento, categoria, observacoes, imagemUrl, authUserId]
         )
 
         const r: DatabaseRecipe = res.rows[0]

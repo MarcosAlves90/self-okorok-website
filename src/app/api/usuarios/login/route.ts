@@ -1,5 +1,6 @@
-﻿import { query } from '@/lib/database'
+import { query } from '@/lib/database'
 import { handleApiError, success, failure, assertString } from '@/lib/api-utils'
+import { signAuthToken, setAuthCookie } from '@/lib/auth'
 
 const isValidEmail = (email: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)
 
@@ -46,7 +47,10 @@ export async function POST(request: Request) {
             createdAt: user.created_at,
         }
 
-        return success(safeUser, MSG.SUCCESS)
+        const token = await signAuthToken(safeUser)
+        const response = success(safeUser, MSG.SUCCESS)
+        setAuthCookie(response, token)
+        return response
     } catch (error) {
         return handleApiError(error, MSG.SERVER_ERROR, 'Erro na rota POST /api/usuarios/login:')
     }

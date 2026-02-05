@@ -15,13 +15,13 @@ export default function CreateRecipeClient() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string>('')
     const router = useRouter()
-    const { user } = useUser()
+    const { user, isLoading } = useUser()
 
     useEffect(() => {
-        if (!user) {
+        if (!isLoading && !user) {
             router.push('/login')
         }
-    }, [user, router])
+    }, [isLoading, user, router])
 
     const openFile = () => fileRef.current?.click()
 
@@ -68,6 +68,16 @@ export default function CreateRecipeClient() {
     useEffect(() => {
         return () => { if (preview) URL.revokeObjectURL(preview) }
     }, [preview])
+
+    if (isLoading) {
+        return (
+            <div className="w-full min-h-[60vh] flex items-center justify-center">
+                <div className="text-center text-foreground">
+                    <p className="text-lg">Carregando sessão...</p>
+                </div>
+            </div>
+        )
+    }
 
     if (!user) {
         return (

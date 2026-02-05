@@ -69,13 +69,17 @@ export default function ProfileEditor({ className = '' }: Props) {
         }
     }
 
-    const handleLogout = () => {
-        setUser(null)
-        setName('Usuário')
-        setAvatar(null)
-        setBio('')
-        setUserId(null)
-        router.push('/login')
+    const handleLogout = async () => {
+        try {
+            await fetch('/api/usuarios/logout', { method: 'POST' })
+        } finally {
+            setUser(null)
+            setName('Usuário')
+            setAvatar(null)
+            setBio('')
+            setUserId(null)
+            router.push('/login')
+        }
     }
 
     return (

@@ -1,5 +1,6 @@
-﻿import { query } from '@/lib/database'
-import { assertParam, ensureRecipeExists, handleApiError, success, failure } from '@/lib/api-utils'
+import { query } from '@/lib/database'
+import { assertParam, handleApiError, success, failure } from '@/lib/api-utils'
+import { ensureSameUser } from '@/lib/auth'
 
 const MSG = {
     SUCCESS: 'Receita deletada com sucesso',
@@ -16,7 +17,17 @@ export async function DELETE(
         const { id } = await params
         const recipeId = assertParam(id, MSG.INVALID_ID)
 
-        await ensureRecipeExists(recipeId, MSG.NOT_FOUND)
+        const recipeResult = await query('SELECT author_id FROM receitas WHERE id = $1', [recipeId])
+        if (!recipeResult.rows || recipeResult.rows.length === 0) {
+            return failure(MSG.NOT_FOUND, 404)
+        }
+
+        const authorId = recipeResult.rows[0].author_id
+        if (!authorId) {
+            return failure(MSG.NOT_FOUND, 404)
+        }
+
+        await ensureSameUser(String(authorId))
 
         await query('DELETE FROM curtidas WHERE receita_id = $1', [recipeId])
         await query('DELETE FROM marcados WHERE receita_id = $1', [recipeId])

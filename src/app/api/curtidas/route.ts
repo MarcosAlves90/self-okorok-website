@@ -1,4 +1,4 @@
-﻿import { query } from '@/lib/database'
+import { query } from '@/lib/database'
 import {
     assertParam,
     assertString,
@@ -8,6 +8,7 @@ import {
     success,
     failure
 } from '@/lib/api-utils'
+import { ensureSameUser } from '@/lib/auth'
 
 const MSG = {
     SUCCESS_LIKE: 'Receita curtida com sucesso',
@@ -32,6 +33,7 @@ export async function GET(request: Request) {
 
         if (userId !== null) {
             const userIdValue = assertString(userId, MSG.INVALID_USER_ID)
+            await ensureSameUser(userIdValue)
             const userLike = await query(
                 'SELECT id FROM curtidas WHERE user_id = $1 AND receita_id = $2',
                 [userIdValue, receitaId]
@@ -61,6 +63,7 @@ export async function POST(request: Request) {
         const userId = assertString(body.userId, MSG.INVALID_USER_ID)
         const receitaId = assertString(body.receitaId, MSG.INVALID_RECIPE_ID)
 
+        await ensureSameUser(userId)
         await ensureUserExists(userId, MSG.USER_NOT_FOUND)
         await ensureRecipeExists(receitaId, MSG.RECIPE_NOT_FOUND)
 
@@ -90,6 +93,7 @@ export async function DELETE(request: Request) {
         const userId = assertString(body.userId, MSG.INVALID_USER_ID)
         const receitaId = assertString(body.receitaId, MSG.INVALID_RECIPE_ID)
 
+        await ensureSameUser(userId)
         await ensureUserExists(userId, MSG.USER_NOT_FOUND)
         await ensureRecipeExists(receitaId, MSG.RECIPE_NOT_FOUND)
 

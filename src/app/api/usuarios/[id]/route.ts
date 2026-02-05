@@ -1,5 +1,6 @@
-﻿import { query } from '@/lib/database'
+import { query } from '@/lib/database'
 import { assertParam, handleApiError, success, failure } from '@/lib/api-utils'
+import { ensureSameUser } from '@/lib/auth'
 
 const MSG = {
     SUCCESS_UPDATED: 'Usuário atualizado com sucesso',
@@ -16,6 +17,9 @@ export async function PUT(
     try {
         const { id } = await params
         const userId = assertParam(id, MSG.INVALID_ID)
+
+        await ensureSameUser(userId)
+
         const body = await request.json().catch(() => ({}))
         const { bio } = body
 

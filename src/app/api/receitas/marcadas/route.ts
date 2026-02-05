@@ -1,5 +1,6 @@
-﻿import { query } from '@/lib/database'
+import { query } from '@/lib/database'
 import { assertParam, ensureUserExists, handleApiError, success } from '@/lib/api-utils'
+import { ensureSameUser } from '@/lib/auth'
 
 const MSG = {
     SUCCESS: 'Receitas marcadas obtidas com sucesso',
@@ -27,6 +28,7 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url)
         const userId = assertParam(searchParams.get('userId'), MSG.INVALID_USER_ID)
 
+        await ensureSameUser(userId)
         await ensureUserExists(userId, MSG.USER_NOT_FOUND)
 
         const queryText = `

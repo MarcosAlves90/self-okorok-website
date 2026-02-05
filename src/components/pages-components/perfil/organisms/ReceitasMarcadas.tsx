@@ -14,17 +14,19 @@ import { fetchJson } from '@/lib/fetch-json'
 function resolveUserId(user: Record<string, unknown> | null): string | null {
     if (!user || typeof user !== 'object') return null
     const id = (user as { id?: unknown }).id
+    if (typeof id === 'number') return String(id)
     return typeof id === 'string' && id.trim().length > 0 ? id : null
 }
 
 export default function ReceitasMarcadas() {
-    const { user } = useUser()
+    const { user, isLoading } = useUser()
     const userId = resolveUserId(user)
 
     const { recipes, setRecipes, loading, error } = useUserRecipes({
         user,
         endpoint: '/api/receitas/marcadas',
-        errorMessage: 'Erro ao carregar receitas marcadas'
+        errorMessage: 'Erro ao carregar receitas marcadas',
+        isLoading
     })
     const { selectedIds, selectedCount, toggle, toggleAll, clear, setSelectedIds } = useSelectableIds(recipes)
     const [deleting, setDeleting] = useState(false)

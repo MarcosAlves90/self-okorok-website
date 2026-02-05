@@ -12,12 +12,13 @@ import { filterRecipes } from '@/lib/recipe-utils'
 import { fetchJson } from '@/lib/fetch-json'
 
 export default function MinhasReceitasClient() {
-    const { user } = useUser()
+    const { user, isLoading } = useUser()
 
     const { recipes, setRecipes, loading, error } = useUserRecipes({
         user,
         endpoint: '/api/receitas',
-        errorMessage: 'Erro ao carregar receitas'
+        errorMessage: 'Erro ao carregar receitas',
+        isLoading
     })
     const { selectedIds, selectedCount, toggle, toggleAll, clear, setSelectedIds } = useSelectableIds(recipes)
     const [deleting, setDeleting] = useState(false)

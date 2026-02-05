@@ -1,57 +1,55 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react'
 
-type User = Record<string, unknown> | null;
+type User = Record<string, unknown> | null
 
 type UserContextType = {
-    user: User;
-    setUser: (u: User) => void;
-};
+    user: User
+    setUser: (u: User) => void
+    isLoading: boolean
+}
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-    const STORAGE_KEY = 'okorok_user';
+    const [user, setUser] = useState<User>(null)
+    const [isLoading, setIsLoading] = useState(true)
 
-    const [user, setUser] = useState<User>(null);
-
-    // carregar usuário salvo
     useEffect(() => {
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) {
-                setUser(JSON.parse(raw));
-            }
-        } catch (err) {
-            // falha silenciosa
-            void err;
-        }
-    }, []);
+        let active = true
 
-    const handleSetUser = (u: User) => {
-        setUser(u);
-        try {
-            if (u) {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
-            } else {
-                localStorage.removeItem(STORAGE_KEY);
+        const loadUser = async () => {
+            try {
+                const res = await fetch('/api/usuarios/me')
+                if (!res.ok) {
+                    if (active) setUser(null)
+                    return
+                }
+                const data = await res.json().catch(() => null) as { success?: boolean; data?: User } | null
+                if (active) {
+                    setUser(data?.success ? data.data ?? null : null)
+                }
+            } catch {
+                if (active) setUser(null)
+            } finally {
+                if (active) setIsLoading(false)
             }
-        } catch (err) {
-            // falha silenciosa
-            void err;
         }
-    };
+
+        loadUser()
+        return () => { active = false }
+    }, [])
 
     return (
-        <UserContext.Provider value={{ user, setUser: handleSetUser }}>
+        <UserContext.Provider value={{ user, setUser, isLoading }}>
             {children}
         </UserContext.Provider>
-    );
+    )
 }
 
 export function useUser() {
-    const ctx = useContext(UserContext);
-    if (!ctx) throw new Error('useUser deve ser usado dentro de UserProvider');
-    return ctx;
+    const ctx = useContext(UserContext)
+    if (!ctx) throw new Error('useUser deve ser usado dentro de UserProvider')
+    return ctx
 }

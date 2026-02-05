@@ -1,44 +1,30 @@
-import { NextResponse } from 'next/server';
-import { query } from '@/lib/database';
-
-const json = (body: unknown, status = 200) => NextResponse.json(body, { status });
+﻿import { query } from '@/lib/database'
+import { assertParam, ensureRecipeExists, handleApiError, success, failure } from '@/lib/api-utils'
 
 const MSG = {
     SUCCESS: 'Receita deletada com sucesso',
     NOT_FOUND: 'Receita não encontrada',
+    INVALID_ID: 'ID da receita é obrigatório',
     SERVER_ERROR: 'Erro interno do servidor',
-} as const;
+} as const
 
 export async function DELETE(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params;
+        const { id } = await params
+        const recipeId = assertParam(id, MSG.INVALID_ID)
 
-        if (!id) {
-            return json({ success: false, message: 'ID da receita é obrigatório' }, 400);
-        }
+        await ensureRecipeExists(recipeId, MSG.NOT_FOUND)
 
-        // Verificar se a receita existe
-        const existingRecipe = await query(
-            'SELECT id FROM receitas WHERE id = $1',
-            [id]
-        );
+        await query('DELETE FROM curtidas WHERE receita_id = $1', [recipeId])
+        await query('DELETE FROM marcados WHERE receita_id = $1', [recipeId])
+        await query('DELETE FROM receitas WHERE id = $1', [recipeId])
 
-        if (!existingRecipe.rows || existingRecipe.rows.length === 0) {
-            return json({ success: false, message: MSG.NOT_FOUND }, 404);
-        }
-
-        await query('DELETE FROM curtidas WHERE receita_id = $1', [id]);
-        await query('DELETE FROM marcados WHERE receita_id = $1', [id]);
-        
-        await query('DELETE FROM receitas WHERE id = $1', [id]);
-
-        return json({ success: true, message: MSG.SUCCESS });
-    } catch (err) {
-        console.error('Erro na rota DELETE /api/receitas/[id]:', err);
-        return json({ success: false, message: MSG.SERVER_ERROR }, 500);
+        return success(undefined, MSG.SUCCESS)
+    } catch (error) {
+        return handleApiError(error, MSG.SERVER_ERROR, 'Erro na rota DELETE /api/receitas/[id]:')
     }
 }
 
@@ -47,11 +33,8 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params;
-
-        if (!id) {
-            return json({ success: false, message: 'ID da receita é obrigatório' }, 400);
-        }
+        const { id } = await params
+        const recipeId = assertParam(id, MSG.INVALID_ID)
 
         const result = await query(
             `SELECT 
@@ -61,14 +44,14 @@ export async function GET(
                 FROM receitas r 
                 LEFT JOIN users u ON r.author_id = u.id 
                 WHERE r.id = $1`,
-            [id]
-        );
+            [recipeId]
+        )
 
         if (!result.rows || result.rows.length === 0) {
-            return json({ success: false, message: MSG.NOT_FOUND }, 404);
+            return failure(MSG.NOT_FOUND, 404)
         }
 
-        const r = result.rows[0];
+        const r = result.rows[0]
         const receita = {
             id: r.id,
             titulo: r.titulo,
@@ -82,11 +65,10 @@ export async function GET(
             authorId: r.author_id || null,
             authorName: r.author_name || null,
             createdAt: r.created_at || null,
-        };
+        }
 
-        return json({ success: true, data: receita });
-    } catch (err) {
-        console.error('Erro na rota GET /api/receitas/[id]:', err);
-        return json({ success: false, message: MSG.SERVER_ERROR }, 500);
+        return success(receita)
+    } catch (error) {
+        return handleApiError(error, MSG.SERVER_ERROR, 'Erro na rota GET /api/receitas/[id]:')
     }
 }

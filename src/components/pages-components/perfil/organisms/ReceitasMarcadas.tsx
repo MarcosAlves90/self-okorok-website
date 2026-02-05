@@ -54,7 +54,7 @@ function ErrorState({ error }: { error: string }) {
 function EmptyState({ searchTerm }: { searchTerm: string }) {
     return (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <div className="text-foreground/60">
+            <div className="text-foreground/60 text-center">
                 {searchTerm ? 'Nenhuma receita encontrada com esse termo' : 'Você ainda não marcou nenhuma receita como favorita'}
             </div>
             {!searchTerm && (
@@ -183,11 +183,11 @@ export default function ReceitasMarcadas() {
     }, [selectedRecipes, user?.id])
 
     return (
-        <div className="border-2 border-foreground px-20 py-17 max-w-6xl w-full flex flex-col gap-6 rounded-xl h-full text-center text-foreground mx-auto">
+        <div className="border-2 border-foreground px-6 sm:px-10 lg:px-20 py-10 sm:py-14 lg:py-17 max-w-6xl w-full flex flex-col gap-6 rounded-xl h-full text-center text-foreground mx-auto">
             <div className="flex flex-col items-center text-center gap-6">
                 <header className="flex flex-col items-center gap-4">
-                    <h1 className="font-protest-strike text-4xl">Receitas Marcadas</h1>
-                    <p className="text-sm text-foreground/80 max-w-2xl">Aqui estão as receitas que você marcou como favoritas. Você pode visualizar ou remover dos favoritos.</p>
+                    <h1 className="font-protest-strike text-3xl sm:text-4xl">Receitas Marcadas</h1>
+                    <p className="text-sm sm:text-base text-foreground/80 max-w-2xl">Aqui estão as receitas que você marcou como favoritas. Você pode visualizar ou remover dos favoritos.</p>
                 </header>
 
                 <ReceitasMarcadasToolbar

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Button from '@/components/atoms/Button'
+import { useUser } from '@/hooks/UserContext'
 
 interface Props {
     searchTerm: string
@@ -20,9 +21,11 @@ export default function ReceitasMarcadasToolbar({
     onRemoveSelected,
     removing
 }: Props) {
+    const { user } = useUser()
+
     return (
-        <div className="w-full flex items-center justify-between max-w-5xl">
-            <div className="flex items-center gap-3">
+        <div className="w-full flex flex-col lg:flex-row items-start lg:items-center gap-4 justify-between max-w-5xl">
+            <div className="flex items-center gap-3 w-full">
                 <input
                     aria-label="Pesquisar receitas marcadas"
                     placeholder="Pesquisar..."
@@ -32,7 +35,7 @@ export default function ReceitasMarcadasToolbar({
                 />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                 {selectedCount > 0 && (
                     <>
                         <button
@@ -50,12 +53,16 @@ export default function ReceitasMarcadasToolbar({
                         </button>
                     </>
                 )}
-                <Link href="/">
-                    <Button variant="primary" size="sm">Explorar receitas</Button>
-                </Link>
-                <Link href="/perfil">
-                    <Button variant="primary" size="sm">Voltar ao perfil</Button>
-                </Link>
+                <div className="flex w-full sm:w-auto gap-3">
+                    <Link href="/" className="flex-1 sm:flex-none">
+                        <Button variant="primary" size="sm" className="w-full">Explorar receitas</Button>
+                    </Link>
+                    {user && (
+                        <Link href="/perfil" className="flex-1 sm:flex-none">
+                            <Button variant="primary" size="sm" className="w-full">Voltar ao perfil</Button>
+                        </Link>
+                    )}
+                </div>
             </div>
         </div>
     )

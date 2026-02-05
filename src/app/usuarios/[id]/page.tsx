@@ -61,22 +61,22 @@ export default async function UserProfilePage({ params }: Props) {
 	if (!user) notFound();
 
 	return (
-		<main className="min-h-[calc(100vh-82px)] mt-[82px] flex flex-col justify-center items-center py-20">
-			<div className="relative border-2 border-foreground px-20 py-17 max-w-6xl w-full flex flex-col gap-6 rounded-xl h-full text-center text-foreground">
-				<div className="flex flex-col items-center gap-4 mt-4">
+		<main className="min-h-[calc(100vh-82px)] mt-[82px] flex flex-col justify-center items-center py-10 sm:py-16 lg:py-20 px-[var(--pc-padding)]">
+			<div className="relative border-2 border-foreground px-6 sm:px-10 lg:px-20 py-10 sm:py-14 lg:py-17 max-w-6xl w-full flex flex-col gap-6 rounded-xl h-full text-center text-foreground">
+				<div className="flex flex-col items-center gap-4 mt-2 sm:mt-4">
 					<div className='flex flex-col items-center'>
 						<AvatarDisplay size={140} src={user.avatarUrl ?? null} />
-						<h3 className="text-base font-semibold text-foreground mt-2">{user.name || 'Usuário'}</h3>
+						<h3 className="text-base sm:text-lg font-semibold text-foreground mt-2">{user.name || 'Usuário'}</h3>
 					</div>
 
-					<div className="w-full max-w-sm mt-4 text-left">
+					<div className="w-full max-w-md mt-4 text-left">
 						<label htmlFor="bio" className="block text-sm font-medium text-foreground mb-2">Bio</label>
 						<div id="bio" className="w-full bg-background-gray placeholder:text-foreground/60 border-2 border-foreground rounded-xl px-4 py-3 text-sm text-foreground" style={{ whiteSpace: 'pre-wrap' }}>
 							{user.bio || 'Nenhuma bio informada.'}
 						</div>
 					</div>
 
-					<div className='max-w-sm w-full mt-4'>
+					<div className='max-w-md w-full mt-4'>
 						<BackButton />
 					</div>
 				</div>

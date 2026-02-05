@@ -71,13 +71,13 @@ export default function ProfileEditor({ className = '' }: Props) {
     }
 
     return (
-        <div className={`flex flex-col items-center gap-4 mt-4 ${className}`}>
+        <div className={`flex flex-col items-center gap-4 mt-2 sm:mt-4 ${className}`}>
             <div className='flex flex-col items-center'>
                 <AvatarDisplay size={140} src={avatar} />
-                <h3 className="text-base font-semibold text-foreground mt-2">{name}</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-foreground mt-2">{name}</h3>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
                 <button
                     type="button"
                     onClick={handleSaveBio}
@@ -99,7 +99,7 @@ export default function ProfileEditor({ className = '' }: Props) {
                 </button>
             </div>
 
-            <div className="w-full max-w-sm mt-4 text-left">
+            <div className="w-full max-w-md mt-4 text-left">
                 <label htmlFor="bio" className="block text-sm font-medium text-foreground mb-2">
                     Bio
                 </label>
@@ -119,16 +119,16 @@ export default function ProfileEditor({ className = '' }: Props) {
                 </span>
             </div>
 
-            <div className="w-full max-w-sm mt-3 grid grid-cols-2 gap-7 font-protest-strike text-2xl text-start">
+            <div className="w-full max-w-md mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-7 font-protest-strike text-xl sm:text-2xl text-start">
                 <Link
                     href="/perfil/minhas-receitas"
-                    className="min-h-35 transition-colors duration-200 ease-in-out hover:bg-foreground/30 hover:border-foreground/30 hover:text-foreground cursor-pointer bg-foreground text-background rounded-md pb-1 px-3 flex justify-start items-end w-full text-left"
+                    className="min-h-28 sm:min-h-35 transition-colors duration-200 ease-in-out hover:bg-foreground/30 hover:border-foreground/30 hover:text-foreground cursor-pointer bg-foreground text-background rounded-md pb-1 px-3 flex justify-start items-end w-full text-left"
                 >
                     Minhas Receitas
                 </Link>
                 <Link
                     href="/perfil/receitas-marcadas"
-                    className="min-h-35 transition-colors duration-200 ease-in-out hover:bg-foreground/30 cursor-pointer border-2 border-foreground rounded-md pb-1 px-3 flex justify-start items-end w-full text-left"
+                    className="min-h-28 sm:min-h-35 transition-colors duration-200 ease-in-out hover:bg-foreground/30 cursor-pointer border-2 border-foreground rounded-md pb-1 px-3 flex justify-start items-end w-full text-left"
                 >
                     Receitas Marcadas
                 </Link>

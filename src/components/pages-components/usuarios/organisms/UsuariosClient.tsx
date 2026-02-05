@@ -81,20 +81,16 @@ export default function UsuariosClient(): React.ReactElement {
                             aria-label="Pesquisar usuários por nome"
                             className="w-full bg-background-gray placeholder:text-foreground/60 border-2 border-foreground rounded-xl px-4 py-3 text-sm focus:outline-none"
                         />
-                        <div className="text-sm text-foreground/60 sm:ml-3 whitespace-nowrap">
-                            {filtered.length} {filtered.length === 1 ? 'usuário encontrado' : 'usuários encontrados'}
-                            {q && ` para "${q}"`}
-                        </div>
                     </div>
 
                     <div className="w-full sm:w-auto">
                         {currentUser ? (
                             <Link href="/perfil">
-                                <Button variant="primary" size="sm">Meu Perfil</Button>
+                                <Button variant="primary" size="sm">Perfil</Button>
                             </Link>
                         ) : (
                             <Link href="/login">
-                                <Button variant="primary" size="sm">Fazer login</Button>
+                                <Button variant="primary" size="sm">Login</Button>
                             </Link>
                         )}
                     </div>

@@ -6,9 +6,9 @@ export default function Hero(): React.ReactElement {
         <section
             className="hero min-h-[calc(100vh-3rem)] flex items-center justify-center relative overflow-hidden text-background px-[var(--pc-padding)] py-10 lg:py-0"
             role="region"
-            aria-label="Hero de destaque"
+            aria-label="Área de destaque"
         >
-            {/* Blur e escuridÃ£o */}
+            {/* Desfoque e escurecimento */}
             <div className="bg-black/46 backdrop-blur-sm absolute inset-0 z-[2]" aria-hidden="true" />
             <Image
                 src="https://res.cloudinary.com/dyenpzpcr/image/upload/v1755488141/hero-background_vmw9cp.png"
@@ -27,12 +27,12 @@ export default function Hero(): React.ReactElement {
                     <h2 className="font-protest-strike text-4xl sm:text-5xl lg:text-7xl xl:text-8xl">
                         SUCULENTA E<br /> SABOROSA!
                     </h2>
-                    <p className="text-base sm:text-lg lg:text-2xl">as melhores receitas, sÃ³ aqui.</p>
+                    <p className="text-base sm:text-lg lg:text-2xl">as melhores receitas, só aqui.</p>
                 </div>
                 <div className="flex justify-center lg:justify-end w-full lg:w-auto">
                     <Image
                         src="https://res.cloudinary.com/dyenpzpcr/image/upload/v1755488143/hero-highlight_ydet61.png"
-                        alt="IlustraÃ§Ã£o em destaque relacionada Ã s receitas"
+                        alt="Ilustração em destaque relacionada às receitas"
                         width={600}
                         height={600}
                         sizes="(min-width: 1024px) 32rem, (min-width: 640px) 22rem, 18rem"

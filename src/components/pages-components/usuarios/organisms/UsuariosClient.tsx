@@ -62,17 +62,17 @@ export default function UsuariosClient(): React.ReactElement {
         .sort((a, b) => a.name.localeCompare(b.name));
 
     return (
-        <div className="border-2 border-foreground px-20 py-17 max-w-6xl w-full flex flex-col gap-6 rounded-xl h-full text-center text-foreground mx-auto">
+        <div className="border-2 border-foreground px-6 sm:px-10 lg:px-20 py-10 sm:py-14 lg:py-17 max-w-6xl w-full flex flex-col gap-6 rounded-xl h-full text-center text-foreground mx-auto">
             <div className="flex flex-col items-center text-center gap-6">
                 <div className="flex flex-col items-center gap-4">
-                    <h1 className="font-protest-strike text-4xl">Usuários</h1>
-                    <p className="text-sm text-foreground/80 max-w-2xl">
+                    <h1 className="font-protest-strike text-3xl sm:text-4xl">Usuários</h1>
+                    <p className="text-sm sm:text-base text-foreground/80 max-w-2xl">
                         Explore a comunidade de usuários da plataforma. Encontre outros entusiastas da culinária e descubra suas receitas.
                     </p>
                 </div>
 
-                <div className="w-full flex items-center justify-between max-w-5xl">
-                    <div className="flex items-center gap-3">
+                <div className="w-full flex flex-col lg:flex-row items-start lg:items-center gap-4 justify-between max-w-5xl">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
                         <input
                             id="search"
                             value={q}
@@ -81,13 +81,13 @@ export default function UsuariosClient(): React.ReactElement {
                             aria-label="Pesquisar usuários por nome"
                             className="w-full bg-background-gray placeholder:text-foreground/60 border-2 border-foreground rounded-xl px-4 py-3 text-sm focus:outline-none"
                         />
-                        <div className="text-sm text-foreground/60 ml-3 whitespace-nowrap">
+                        <div className="text-sm text-foreground/60 sm:ml-3 whitespace-nowrap">
                             {filtered.length} {filtered.length === 1 ? 'usuário encontrado' : 'usuários encontrados'}
                             {q && ` para "${q}"`}
                         </div>
                     </div>
 
-                    <div>
+                    <div className="w-full sm:w-auto">
                         {currentUser ? (
                             <Link href="/perfil">
                                 <Button variant="primary" size="sm">Meu Perfil</Button>
@@ -119,7 +119,7 @@ export default function UsuariosClient(): React.ReactElement {
                 ) : (
                     <>
                         <section className="w-full max-w-5xl mt-6">
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
                                 {filtered.map((user) => (
                                     <UserCard key={user.id} user={user} currentUserId={currentUserId} />
                                 ))}

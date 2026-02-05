@@ -1,12 +1,14 @@
-'use client'
+﻿'use client'
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
 import Link from 'next/link';
 import Button from '@/components/atoms/Button';
 import { useUser } from '@/hooks/UserContext';
 import UsersSkeleton from '../molecules/UsersSkeleton';
 import UserCard from '../molecules/UserCard';
 import PagePanel from '@/components/pages-components/shared/PagePanel';
+import { fetchJson } from '@/lib/fetch-json';
 
 type User = {
     id: number;
@@ -17,49 +19,59 @@ type User = {
     bio?: string | null;
 };
 
-export default function UsuariosClient(): React.ReactElement {
+function resolveUserId(user: Record<string, unknown> | null): number | string | null {
+    if (!user) return null;
+    const id = user.id;
+    if (typeof id === 'number' || typeof id === 'string') return id;
+    return null;
+}
+
+export default function UsuariosClient(): ReactElement {
     const [users, setUsers] = useState<User[]>([]);
     const [q, setQ] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { user: currentUser } = useUser();
 
-    const currentUserId: number | string | null = (() => {
-        if (!currentUser) return null;
-        const userData = currentUser as Record<string, unknown>;
-        const id = userData.id;
-        if (typeof id === 'number' || typeof id === 'string') return id;
-        return null;
-    })();
+    const currentUserId = resolveUserId(currentUser as Record<string, unknown> | null);
 
     useEffect(() => {
-        let mounted = true;
-        setLoading(true);
-        fetch('/api/usuarios')
-            .then((res) => {
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                return res.json();
-            })
-            .then((response: { success: boolean; data: User[]; message: string }) => {
-                if (mounted) {
-                    setUsers(response.data || []);
-                    setError(null);
+        const controller = new AbortController();
+
+        const loadUsers = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await fetchJson<User[]>(
+                    '/api/usuarios',
+                    { signal: controller.signal },
+                    'Falha ao carregar usuários'
+                );
+                setUsers(response.data || []);
+            } catch (err) {
+                if (!controller.signal.aborted) {
+                    console.error('Erro ao buscar usuários:', err);
+                    setError(err instanceof Error ? err.message : 'Falha ao carregar usuários');
                 }
-            })
-            .catch((err) => {
-                console.error('Erro ao buscar usuários:', err);
-                if (mounted) setError('Falha ao carregar usuários');
-            })
-            .finally(() => mounted && setLoading(false));
+            } finally {
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        loadUsers();
 
         return () => {
-            mounted = false;
+            controller.abort();
         };
     }, []);
 
-    const filtered = (Array.isArray(users) ? users : [])
-        .filter((u) => u.name.toLowerCase().includes(q.toLowerCase()))
-        .sort((a, b) => a.name.localeCompare(b.name));
+    const filtered = useMemo(() => {
+        return (Array.isArray(users) ? users : [])
+            .filter((u) => u.name.toLowerCase().includes(q.toLowerCase()))
+            .sort((a, b) => a.name.localeCompare(b.name));
+    }, [q, users]);
 
     return (
         <PagePanel

@@ -1,4 +1,5 @@
-import { useState, useRef, FormEvent } from 'react'
+﻿import { useState, useRef, FormEvent } from 'react'
+import { fetchJson } from '@/lib/fetch-json'
 
 interface ContactFormData {
     name: string
@@ -25,6 +26,10 @@ const MESSAGES = {
     UNKNOWN_ERROR: 'Erro ao enviar a mensagem',
 } as const
 
+type TicketResponse = {
+    message?: string
+}
+
 export function useContactForm(): UseContactFormReturn {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -48,17 +53,15 @@ export function useContactForm(): UseContactFormReturn {
 
     // Envia os dados para o endpoint
     const sendTicket = async (data: ContactFormData) => {
-        const response = await fetch(ENDPOINTS.SEND_TICKET, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        })
-
-        const json = await response.json().catch(() => null)
-
-        if (!response.ok) {
-            throw new Error(json?.message ?? MESSAGES.UNKNOWN_ERROR)
-        }
+        const json = await fetchJson<TicketResponse>(
+            ENDPOINTS.SEND_TICKET,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            },
+            MESSAGES.UNKNOWN_ERROR
+        )
 
         return json?.message ?? MESSAGES.SUCCESS
     }

@@ -1,18 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-
-interface Recipe {
-    id: string
-    titulo: string
-    ingredientes: string
-    modo: string
-    tempo?: string | null
-    rendimento?: string | null
-    categoria?: string | null
-    observacoes?: string | null
-    imagemUrl?: string | null
-    createdAt?: string | null
-}
+import type { Recipe } from '@/types/recipe'
 
 interface Props {
     recipe?: Recipe

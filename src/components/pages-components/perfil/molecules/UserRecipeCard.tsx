@@ -1,18 +1,5 @@
 import RecipeCard from '@/components/pages-components/home/molecules/RecipeCard'
-
-interface Recipe {
-    id: string
-    titulo: string
-    ingredientes: string
-    modo: string
-    tempo?: string | null
-    rendimento?: string | null
-    categoria?: string | null
-    observacoes?: string | null
-    imagemUrl?: string | null
-    authorId?: string | null
-    createdAt?: string | null
-}
+import type { Recipe } from '@/types/recipe'
 
 interface UserRecipeCardProps {
     recipe: Recipe

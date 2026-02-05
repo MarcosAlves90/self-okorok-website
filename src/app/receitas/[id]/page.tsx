@@ -1,25 +1,10 @@
-import React from 'react'
 import type { Metadata } from "next";
 import { notFound } from 'next/navigation';
 import RecipeViewClient from '@/components/pages-components/receitas/organisms/RecipeViewClient'
 import { query } from '@/lib/database';
+import type { Recipe } from '@/types/recipe';
 
 type Props = { params: Promise<{ id: string }> };
-
-type Recipe = {
-    id: string;
-    titulo: string;
-    ingredientes: string;
-    modo: string;
-    tempo?: string | null;
-    rendimento?: string | null;
-    categoria?: string | null;
-    observacoes?: string | null;
-    imagemUrl?: string | null;
-    authorId?: string | null;
-    authorName?: string | null;
-    createdAt?: string | null;
-};
 
 async function fetchRecipe(id: string): Promise<Recipe | null> {
     try {
@@ -43,6 +28,7 @@ async function fetchRecipe(id: string): Promise<Recipe | null> {
         }
 
         const r = result.rows[0];
+        const authorId = r.author_id ? String(r.author_id) : null;
         return {
             id: r.id,
             titulo: r.titulo,
@@ -53,7 +39,7 @@ async function fetchRecipe(id: string): Promise<Recipe | null> {
             categoria: r.categoria || null,
             observacoes: r.observacoes || null,
             imagemUrl: r.imagem_url || null,
-            authorId: r.author_id || null,
+            authorId,
             authorName: r.author_name || null,
             createdAt: r.created_at || null,
         };

@@ -1,8 +1,8 @@
-import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactElement } from "react";
 
-export default function Hero(): React.ReactElement {
+export default function Hero(): ReactElement {
     return (
         <section
             className="hero relative overflow-hidden text-background px-[var(--pc-padding)] pt-20 pb-10 sm:pt-24 sm:pb-12 lg:pt-32 lg:pb-20"

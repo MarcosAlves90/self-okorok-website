@@ -1,18 +1,23 @@
-import { NextResponse } from 'next/server';
-import { query } from '@/lib/database';
-
-const json = (body: unknown, status = 200) => NextResponse.json(body, { status });
+﻿import { query } from '@/lib/database'
+import { handleApiError, success } from '@/lib/api-utils'
 
 const MSG = {
     SUCCESS: 'Receitas mais votadas obtidas com sucesso',
     SERVER_ERROR: 'Erro interno do servidor',
-} as const;
+} as const
 
 interface MostVotedRecipe {
-    id: string;
-    title: string;
-    image: string;
-    likes_count: number;
+    id: string
+    title: string
+    image: string
+    likes_count: number
+}
+
+interface DatabaseRow {
+    id: string
+    titulo: string
+    imagem_url?: string | null
+    likes_count: string
 }
 
 export async function GET() {
@@ -28,31 +33,19 @@ export async function GET() {
             GROUP BY r.id, r.titulo, r.imagem_url
             ORDER BY likes_count DESC, r.created_at DESC
             LIMIT 6
-        `;
+        `
 
-        const result = await query(queryText);
-
-interface DatabaseRow {
-    id: string;
-    titulo: string;
-    imagem_url?: string | null;
-    likes_count: string;
-}
+        const result = await query(queryText)
 
         const recipes: MostVotedRecipe[] = result.rows.map((row: DatabaseRow) => ({
             id: row.id,
             title: row.titulo,
-            image: row.imagem_url || '/local-images/linguica.png', // fallback image
+            image: row.imagem_url || '/local-images/linguica.png',
             likes_count: parseInt(row.likes_count) || 0,
-        }));
+        }))
 
-        return json({
-            success: true,
-            message: MSG.SUCCESS,
-            data: recipes
-        });
+        return success(recipes, MSG.SUCCESS)
     } catch (err) {
-        console.error('Erro na rota GET /api/receitas/most-voted:', err);
-        return json({ success: false, message: MSG.SERVER_ERROR }, 500);
+        return handleApiError(err, MSG.SERVER_ERROR, 'Erro na rota GET /api/receitas/most-voted:')
     }
 }

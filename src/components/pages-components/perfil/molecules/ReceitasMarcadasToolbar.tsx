@@ -6,7 +6,7 @@ interface Props {
     searchTerm: string
     setSearchTerm: (v: string) => void
     selectedCount: number
-    totalCount: number
+    allVisibleSelected: boolean
     onSelectAll: () => void
     onRemoveSelected: () => void
     removing: boolean
@@ -16,7 +16,7 @@ export default function ReceitasMarcadasToolbar({
     searchTerm,
     setSearchTerm,
     selectedCount,
-    totalCount,
+    allVisibleSelected,
     onSelectAll,
     onRemoveSelected,
     removing
@@ -42,7 +42,7 @@ export default function ReceitasMarcadasToolbar({
                             onClick={onSelectAll}
                             className="h-11 w-full sm:w-auto px-3 text-sm bg-transparent text-foreground-dark border-2 border-foreground rounded-md hover:bg-foreground/10 transition-colors whitespace-nowrap"
                         >
-                            {selectedCount === totalCount ? 'Desmarcar todas' : 'Selecionar todas'}
+                            {allVisibleSelected ? 'Desmarcar todas' : 'Selecionar todas'}
                         </button>
                         <button
                             onClick={onRemoveSelected}

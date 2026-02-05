@@ -6,6 +6,7 @@ import Button from '@/components/atoms/Button';
 import { useUser } from '@/hooks/UserContext';
 import UsersSkeleton from '../molecules/UsersSkeleton';
 import UserCard from '../molecules/UserCard';
+import PagePanel from '@/components/pages-components/shared/PagePanel';
 
 type User = {
     id: number;
@@ -15,7 +16,6 @@ type User = {
     avatarUrl?: string | null;
     bio?: string | null;
 };
-
 
 export default function UsuariosClient(): React.ReactElement {
     const [users, setUsers] = useState<User[]>([]);
@@ -62,16 +62,11 @@ export default function UsuariosClient(): React.ReactElement {
         .sort((a, b) => a.name.localeCompare(b.name));
 
     return (
-        <div className="border-2 border-foreground px-6 sm:px-10 lg:px-20 py-10 sm:py-14 lg:py-17 max-w-6xl w-full flex flex-col gap-6 rounded-xl h-full text-center text-foreground mx-auto">
-            <div className="flex flex-col items-center text-center gap-6">
-                <div className="flex flex-col items-center gap-4">
-                    <h1 className="font-protest-strike text-3xl sm:text-4xl">Usuários</h1>
-                    <p className="text-sm sm:text-base text-foreground/80 max-w-2xl">
-                        Explore a comunidade de usuários da plataforma. Encontre outros entusiastas da culinária e descubra suas receitas.
-                    </p>
-                </div>
-
-                <div className="w-full flex flex-col lg:flex-row items-start lg:items-center gap-4 justify-between max-w-5xl">
+        <PagePanel
+            title="Usuários"
+            description="Explore a comunidade de usuários da plataforma. Encontre outros entusiastas da culinária e descubra suas receitas."
+            toolbar={
+                <div className="w-full flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between max-w-5xl">
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
                         <input
                             id="search"
@@ -79,51 +74,49 @@ export default function UsuariosClient(): React.ReactElement {
                             onChange={(e) => setQ(e.target.value)}
                             placeholder="Pesquisar por nome..."
                             aria-label="Pesquisar usuários por nome"
-                            className="w-full bg-background-gray placeholder:text-foreground/60 border-2 border-foreground rounded-xl px-4 py-3 text-sm focus:outline-none"
+                            className="w-full h-11 bg-background-gray placeholder:text-foreground/60 border-2 border-foreground rounded-xl px-4 text-sm focus:outline-none"
                         />
                     </div>
 
-                    <div className="w-full sm:w-auto">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                         {currentUser ? (
                             <Link href="/perfil">
-                                <Button variant="primary" size="sm">Perfil</Button>
+                                <Button variant="primary" size="sm" className="w-full sm:w-auto h-11 whitespace-nowrap">Meu Perfil</Button>
                             </Link>
                         ) : (
                             <Link href="/login">
-                                <Button variant="primary" size="sm">Login</Button>
+                                <Button variant="primary" size="sm" className="w-full sm:w-auto h-11 whitespace-nowrap">Fazer login</Button>
                             </Link>
                         )}
                     </div>
                 </div>
-
-                {loading ? (
-                    <UsersSkeleton />
-                ) : error ? (
-                    <div className="w-full max-w-5xl mt-6 flex justify-center items-center py-12">
-                        <div className="text-red-500 text-center">
-                            <p className="text-lg font-medium">Ops! Algo deu errado</p>
-                            <p className="text-sm mt-2">{error}</p>
-                        </div>
+            }
+        >
+            {loading ? (
+                <UsersSkeleton />
+            ) : error ? (
+                <div className="w-full max-w-5xl mt-6 flex justify-center items-center py-12">
+                    <div className="text-red-500 text-center">
+                        <p className="text-lg font-medium">Ops! Algo deu errado</p>
+                        <p className="text-sm mt-2">{error}</p>
                     </div>
-                ) : filtered.length === 0 ? (
-                    <div className="w-full max-w-5xl mt-6 flex justify-center items-center py-12">
-                        <div className="text-foreground/60 text-center">
-                            <p className="text-lg font-medium">Nenhum usuário encontrado</p>
-                            <p className="text-sm mt-2">Tente ajustar sua pesquisa ou filtro</p>
-                        </div>
+                </div>
+            ) : filtered.length === 0 ? (
+                <div className="w-full max-w-5xl mt-6 flex justify-center items-center py-12">
+                    <div className="text-foreground/60 text-center">
+                        <p className="text-lg font-medium">Nenhum usuário encontrado</p>
+                        <p className="text-sm mt-2">Tente ajustar sua pesquisa ou filtro</p>
                     </div>
-                ) : (
-                    <>
-                        <section className="w-full max-w-5xl mt-6">
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
-                                {filtered.map((user) => (
-                                    <UserCard key={user.id} user={user} currentUserId={currentUserId} />
-                                ))}
-                            </div>
-                        </section>
-                    </>
-                )}
-            </div>
-        </div>
+                </div>
+            ) : (
+                <section className="w-full max-w-5xl mt-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
+                        {filtered.map((user) => (
+                            <UserCard key={user.id} user={user} currentUserId={currentUserId} />
+                        ))}
+                    </div>
+                </section>
+            )}
+        </PagePanel>
     );
 }

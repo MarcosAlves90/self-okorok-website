@@ -7,6 +7,7 @@ import { useUser } from '@/hooks/UserContext'
 import UserRecipeCard from '@/components/pages-components/perfil/molecules/UserRecipeCard'
 import ReceitasMarcadasToolbar from '@/components/pages-components/perfil/molecules/ReceitasMarcadasToolbar'
 import Button from '@/components/atoms/Button'
+import PagePanel from '@/components/pages-components/shared/PagePanel'
 
 type Recipe = {
     id: string
@@ -183,13 +184,10 @@ export default function ReceitasMarcadas() {
     }, [selectedRecipes, user?.id])
 
     return (
-        <div className="border-2 border-foreground px-6 sm:px-10 lg:px-20 py-10 sm:py-14 lg:py-17 max-w-6xl w-full flex flex-col gap-6 rounded-xl h-full text-center text-foreground mx-auto">
-            <div className="flex flex-col items-center text-center gap-6">
-                <header className="flex flex-col items-center gap-4">
-                    <h1 className="font-protest-strike text-3xl sm:text-4xl">Receitas Marcadas</h1>
-                    <p className="text-sm sm:text-base text-foreground/80 max-w-2xl">Aqui estão as receitas que você marcou como favoritas. Você pode visualizar ou remover dos favoritos.</p>
-                </header>
-
+        <PagePanel
+            title="Receitas Marcadas"
+            description="Aqui estão as receitas que você marcou como favoritas. Você pode visualizar ou remover dos favoritos."
+            toolbar={
                 <ReceitasMarcadasToolbar
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
@@ -199,29 +197,28 @@ export default function ReceitasMarcadas() {
                     onRemoveSelected={removeSelected}
                     removing={deleting}
                 />
-
-                <section className="w-full max-w-5xl mt-6">
-                    {loading ? (
-                        <LoadingGrid />
-                    ) : error ? (
-                        <ErrorState error={error} />
-                    ) : filteredRecipes.length === 0 ? (
-                        <EmptyState searchTerm={searchTerm} />
-                    ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                            {filteredRecipes.map(recipe => (
-                                <UserRecipeCard
-                                    key={recipe.id}
-                                    recipe={recipe}
-                                    isSelected={selectedRecipes.has(recipe.id)}
-                                    onSelect={toggle}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </section>
-
-            </div>
-        </div>
+            }
+        >
+            <section className="w-full max-w-5xl mt-6">
+                {loading ? (
+                    <LoadingGrid />
+                ) : error ? (
+                    <ErrorState error={error} />
+                ) : filteredRecipes.length === 0 ? (
+                    <EmptyState searchTerm={searchTerm} />
+                ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {filteredRecipes.map(recipe => (
+                            <UserRecipeCard
+                                key={recipe.id}
+                                recipe={recipe}
+                                isSelected={selectedRecipes.has(recipe.id)}
+                                onSelect={toggle}
+                            />
+                        ))}
+                    </div>
+                )}
+            </section>
+        </PagePanel>
     )
 }

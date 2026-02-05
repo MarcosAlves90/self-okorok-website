@@ -7,6 +7,7 @@ import { useUser } from '@/hooks/UserContext'
 import UserRecipeCard from '@/components/pages-components/perfil/molecules/UserRecipeCard'
 import MinhasReceitasToolbar from '@/components/pages-components/perfil/molecules/MinhasReceitasToolbar'
 import Button from '@/components/atoms/Button'
+import PagePanel from '@/components/pages-components/shared/PagePanel'
 
 type Recipe = {
     id: string
@@ -54,7 +55,7 @@ function ErrorState({ error }: { error: string }) {
 function EmptyState({ searchTerm }: { searchTerm: string }) {
     return (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <div className="text-foreground/60">
+            <div className="text-foreground/60 text-center">
                 {searchTerm ? 'Nenhuma receita encontrada com esse termo' : 'Você ainda não criou nenhuma receita'}
             </div>
             {!searchTerm && (
@@ -177,13 +178,10 @@ export default function MinhasReceitasClient() {
     }, [selectedRecipes])
 
     return (
-        <div className="border-2 border-foreground px-20 py-17 max-w-6xl w-full flex flex-col gap-6 rounded-xl h-full text-center text-foreground mx-auto">
-            <div className="flex flex-col items-center text-center gap-6">
-                <header className="flex flex-col items-center gap-4">
-                    <h1 className="font-protest-strike text-4xl">Minhas Receitas</h1>
-                    <p className="text-sm text-foreground/80 max-w-2xl">Aqui estão as receitas que você criou. Você pode editar, remover ou compartilhar cada uma delas.</p>
-                </header>
-
+        <PagePanel
+            title="Minhas Receitas"
+            description="Aqui estão as receitas que você criou. Você pode editar, remover ou compartilhar cada uma delas."
+            toolbar={
                 <MinhasReceitasToolbar
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
@@ -193,29 +191,28 @@ export default function MinhasReceitasClient() {
                     onDeleteSelected={deleteSelected}
                     deleting={deleting}
                 />
-
-                <section className="w-full max-w-5xl mt-6">
-                    {loading ? (
-                        <LoadingGrid />
-                    ) : error ? (
-                        <ErrorState error={error} />
-                    ) : filteredRecipes.length === 0 ? (
-                        <EmptyState searchTerm={searchTerm} />
-                    ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                            {filteredRecipes.map(recipe => (
-                                <UserRecipeCard
-                                    key={recipe.id}
-                                    recipe={recipe}
-                                    isSelected={selectedRecipes.has(recipe.id)}
-                                    onSelect={toggleSelect}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </section>
-
-            </div>
-        </div>
+            }
+        >
+            <section className="w-full max-w-5xl mt-6">
+                {loading ? (
+                    <LoadingGrid />
+                ) : error ? (
+                    <ErrorState error={error} />
+                ) : filteredRecipes.length === 0 ? (
+                    <EmptyState searchTerm={searchTerm} />
+                ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
+                        {filteredRecipes.map(recipe => (
+                            <UserRecipeCard
+                                key={recipe.id}
+                                recipe={recipe}
+                                isSelected={selectedRecipes.has(recipe.id)}
+                                onSelect={toggleSelect}
+                            />
+                        ))}
+                    </div>
+                )}
+            </section>
+        </PagePanel>
     )
 }

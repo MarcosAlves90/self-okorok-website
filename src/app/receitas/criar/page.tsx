@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
     return (
-        <main className="h-[calc(100vh-82px)] mt-[82px] flex justify-center items-center py-20 px-(--pc-padding) text-background">
+        <main className="min-h-[calc(100vh-82px)] mt-[82px] flex justify-center items-center py-10 sm:py-16 lg:py-20 px-[var(--pc-padding)] text-background">
             <CreateRecipeClient />
         </main>
     )

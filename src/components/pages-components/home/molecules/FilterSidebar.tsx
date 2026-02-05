@@ -1,94 +1,210 @@
 'use client'
 
-import React, { useState, useMemo } from "react";
-import { PanelLeft } from 'lucide-react';
+import React, { useMemo, useState } from 'react'
+import { ChevronDown, ChevronUp, PanelLeft } from 'lucide-react'
 
-// filtros
-const FILTERS = [
-    { title: "Tipo de carne", items: ["Picanha", "Tomahawk", "Coxinha", "Bisteca", "Bacon", "Acém"] },
-    { title: "Tipo de receita", items: ["Grelhado", "Churrasco", "Fogueira", "Espeto", "Chapa", "Acompanh."] },
-    { title: "Cortes especiais", items: ["Angus","Wagyu","Prime","Sashi","Fraldinha","Alcatra","Cupim"] },
-    { title: "Região", items: ["Brasileira", "Argentina", "Americana", "Italiana", "Portuguesa", "Ásia"] },
-    { title: "Nível de dificuldade", items: ["Fácil", "Médio", "Difícil"] },
-    { title: "Tempo de preparo", items: ["<= 15 min", "15-30 min", "30-60 min", "> 60 min"] },
-    { title: "Dietas", items: ["Vegetariano", "Vegano", "Low Carb", "Sem glúten", "Sem lactose"] },
-    { title: "Ocasião", items: ["Churrasco", "Jantar especial", "Almoço rápido", "Happy hour"] },
-];
-
-export default function FilterSidebar(): React.ReactElement {
-    return (
-        <aside className="bg-[#8a3b1a] rounded-lg text-sm text-white flex flex-col h-auto max-h-[70vh] lg:h-[40rem] lg:max-h-none">
-            <SidebarHeader />
-            <div className="space-y-6 px-5 overflow-y-auto flex-1">
-                {FILTERS.map((filter) => (
-                    <FilterSection key={filter.title} title={filter.title} items={filter.items} />
-                ))}
-            </div>
-        </aside>
-    );
+export type FilterItem = {
+    id: string
+    label: string
+    count?: number
 }
 
-type FilterSectionProps = { title: string; items: string[] };
+export type FilterGroup = {
+    id: string
+    label: string
+    items: FilterItem[]
+}
 
-// cabeçalho
-function SidebarHeader() {
+export type SelectedFilters = Record<string, Set<string>>
+
+interface FilterSidebarProps {
+    groups: FilterGroup[]
+    selected: SelectedFilters
+    totalSelected: number
+    collapsed: boolean
+    onToggleCollapsed: () => void
+    onToggleItem: (groupId: string, itemId: string) => void
+    onClearAll: () => void
+}
+
+const DEFAULT_SLICE_LIMIT = 6
+
+export default function FilterSidebar({
+    groups,
+    selected,
+    totalSelected,
+    collapsed,
+    onToggleCollapsed,
+    onToggleItem,
+    onClearAll
+}: FilterSidebarProps): React.ReactElement {
     return (
-        <div className="flex items-center justify-between mb-4 px-5 py-3 rounded-t-lg bg-foreground-dark flex-none">
-            <h3 className="font-semibold">Filtros</h3>
-            <button aria-label="toggle-filters" className="w-7 h-7 flex items-center justify-center text-white">
-                <PanelLeft size={25} />
-            </button>
+        <div className="rounded-2xl border border-foreground/15 bg-background shadow-[0_10px_30px_rgba(164,66,20,0.12)] overflow-hidden">
+            <SidebarHeader
+                totalSelected={totalSelected}
+                collapsed={collapsed}
+                onToggleCollapsed={onToggleCollapsed}
+                onClearAll={onClearAll}
+            />
+            {!collapsed && (
+                <div className="space-y-3 px-3 py-3">
+                    {groups.length === 0 ? (
+                        <div className="text-sm text-foreground/70">Nenhum filtro disponivel.</div>
+                    ) : (
+                        groups.map((group) => (
+                            <FilterSection
+                                key={group.id}
+                                group={group}
+                                selected={selected[group.id]}
+                                onToggleItem={onToggleItem}
+                            />
+                        ))
+                    )}
+                </div>
+            )}
         </div>
-    );
+    )
 }
 
-function FilterSection({ title, items }: FilterSectionProps): React.ReactElement {
-    const [collapsed, setCollapsed] = useState(false);
-    const [showAll, setShowAll] = useState(false);
-    const sliceLimit = 5;
-    const visibleItems = useMemo(() => (showAll ? items : items.slice(0, sliceLimit)), [items, showAll]);
+interface SidebarHeaderProps {
+    totalSelected: number
+    collapsed: boolean
+    onToggleCollapsed: () => void
+    onClearAll: () => void
+}
 
+function SidebarHeader({
+    totalSelected,
+    collapsed,
+    onToggleCollapsed,
+    onClearAll
+}: SidebarHeaderProps) {
     return (
-        <section>
-            <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium text-sm">{title}</h4>
-                <button
-                    aria-label={`${collapsed ? "expand" : "collapse"}-${title}`}
-                    className="w-7 h-7 flex items-center justify-center cursor-pointer text-white/90 text-2xl"
-                    onClick={() => setCollapsed((v) => !v)}
-                    title={collapsed ? "Expandir seção" : "Colapsar seção"}
-                >
-                    {collapsed ? "+" : "−"}
-                </button>
+        <div className="flex items-center justify-between gap-3 border-b border-foreground/10 px-5 py-4 bg-gradient-to-r from-foreground/10 via-background to-background">
+            <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">Filtros</h3>
+                <p className="text-xs text-foreground/70">
+                    {totalSelected > 0 ? `${totalSelected} selecionado(s)` : 'Refine sua busca'}
+                </p>
             </div>
-            <div className={"overflow-hidden " + (collapsed ? "hidden" : "")}>  
-                <ul className="space-y-2">
-                    {visibleItems.map((item) => (
-                        <FilterCheckbox key={item} title={title} item={item} />
-                    ))}
-                </ul>
-                {items.length > sliceLimit && (
+            <div className="flex items-center gap-2">
+                {totalSelected > 0 && (
                     <button
-                        className="mt-2 text-xs cursor-pointer text-white/70"
-                        onClick={() => setShowAll((v) => !v)}
-                        aria-expanded={showAll}
+                        type="button"
+                        onClick={onClearAll}
+                        className="rounded-full border border-foreground/20 px-3 py-1 text-xs font-medium text-foreground transition-colors hover:bg-foreground/10"
                     >
-                        {showAll ? "− Ver menos" : "+ Ver mais"}
+                        Limpar
                     </button>
                 )}
+                <button
+                    type="button"
+                    aria-label={collapsed ? 'Expandir filtros' : 'Recolher filtros'}
+                    aria-expanded={!collapsed}
+                    onClick={onToggleCollapsed}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-foreground/20 text-foreground transition-all hover:bg-foreground/10 hover:rotate-6"
+                >
+                    <PanelLeft size={16} aria-hidden="true" />
+                </button>
             </div>
-        </section>
-    );
+        </div>
+    )
 }
 
-function FilterCheckbox({ title, item }: { title: string; item: string }) {
-    const safeTitle = title.replace(/\s+/g, "-").toLowerCase().replace(/[^a-z0-9\-]/g, "");
-    const safeItem = item.replace(/\s+/g, "-").toLowerCase().replace(/[^a-z0-9\-]/g, "");
-    const id = `${safeTitle}-${safeItem}`;
+interface FilterSectionProps {
+    group: FilterGroup
+    selected?: Set<string>
+    onToggleItem: (groupId: string, itemId: string) => void
+}
+
+function FilterSection({ group, selected, onToggleItem }: FilterSectionProps): React.ReactElement {
+    const [collapsed, setCollapsed] = useState(false)
+    const [showAll, setShowAll] = useState(false)
+    const visibleItems = useMemo(
+        () => (showAll ? group.items : group.items.slice(0, DEFAULT_SLICE_LIMIT)),
+        [group.items, showAll]
+    )
+
     return (
-        <li className="flex items-center gap-2">
-            <input id={id} type="checkbox" className="w-3 h-3 accent-white" />
-            <label htmlFor={id} className="text-white/90 text-xs">{item}</label>
-        </li>
-    );
+        <section className="rounded-xl border border-foreground/10 bg-gradient-to-br from-background via-background to-foreground/5 p-4">
+            <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-foreground">{group.label}</h4>
+                <button
+                    type="button"
+                    aria-label={collapsed ? `Expandir ${group.label}` : `Recolher ${group.label}`}
+                    aria-expanded={!collapsed}
+                    onClick={() => setCollapsed((value) => !value)}
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-foreground/10 text-foreground/80 transition-all hover:bg-foreground/10"
+                >
+                    {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                </button>
+            </div>
+
+            {!collapsed && (
+                <div className="mt-3 space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                        {visibleItems.map((item) => (
+                            <FilterChip
+                                key={item.id}
+                                groupId={group.id}
+                                item={item}
+                                selected={selected?.has(item.id)}
+                                onToggleItem={onToggleItem}
+                            />
+                        ))}
+                    </div>
+
+                    {group.items.length > DEFAULT_SLICE_LIMIT && (
+                        <button
+                            type="button"
+                            onClick={() => setShowAll((value) => !value)}
+                            className="text-xs font-medium text-foreground/70 transition-colors hover:text-foreground"
+                            aria-expanded={showAll}
+                        >
+                            {showAll ? 'Ver menos' : 'Ver mais'}
+                        </button>
+                    )}
+                </div>
+            )}
+        </section>
+    )
+}
+
+interface FilterChipProps {
+    groupId: string
+    item: FilterItem
+    selected?: boolean
+    onToggleItem: (groupId: string, itemId: string) => void
+}
+
+function FilterChip({ groupId, item, selected = false, onToggleItem }: FilterChipProps) {
+    const id = `${groupId}-${item.id}`
+    return (
+        <label
+            htmlFor={id}
+            className={`group inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium transition-all cursor-pointer ${
+                selected
+                    ? 'border-foreground bg-foreground text-background shadow-sm'
+                    : 'border-foreground/20 text-foreground/80 hover:border-foreground/50 hover:bg-foreground/10'
+            }`}
+        >
+            <input
+                id={id}
+                type="checkbox"
+                checked={selected}
+                onChange={() => onToggleItem(groupId, item.id)}
+                className="sr-only"
+            />
+            <span>{item.label}</span>
+            {typeof item.count === 'number' && (
+                <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] ${
+                        selected ? 'bg-background/20 text-background' : 'bg-foreground/10 text-foreground/70'
+                    }`}
+                >
+                    {item.count}
+                </span>
+            )}
+        </label>
+    )
 }

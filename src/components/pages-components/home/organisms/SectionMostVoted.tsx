@@ -1,14 +1,23 @@
-'use client'
-import React, { useState, useEffect } from 'react';
+﻿'use client'
+import { useEffect, useState } from 'react'
+import type { ReactElement } from 'react'
 import MostVotedCard from "../molecules/MostVotedCard";
 import MostVotedCardSkeleton from "../molecules/MostVotedCardSkeleton";
 import { Star } from "lucide-react";
+import { fetchJson } from '@/lib/fetch-json';
 
 type Item = {
     id: string;
     title: string;
     image: string;
     href?: string;
+};
+
+type MostVotedApiRecipe = {
+    id: string;
+    title: string;
+    image: string;
+    likes_count: number;
 };
 
 const sampleData: Item[] = [
@@ -20,43 +29,47 @@ const sampleData: Item[] = [
     { id: "6", title: "Receita Tradicional", image: "/local-images/linguica.png", href: "/receitas/6" },
 ];
 
-export default function MostVoted(): React.ReactElement {
+export default function MostVoted(): ReactElement {
     const [recipes, setRecipes] = useState<Item[]>(sampleData);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const controller = new AbortController()
+
         const fetchMostVoted = async () => {
             try {
-                const response = await fetch('/api/receitas/mais-votadas');
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success) {
-                        type ApiRecipe = {
-                            id: string;
-                            title: string;
-                            image: string;
-                            likes_count: number;
-                        };
+                const data = await fetchJson<MostVotedApiRecipe[]>(
+                    '/api/receitas/mais-votadas',
+                    { signal: controller.signal },
+                    'Erro ao buscar receitas mais votadas'
+                );
 
-                        const fetchedRecipes = data.data.map((recipe: ApiRecipe) => ({
-                            id: recipe.id,
-                            title: recipe.title,
-                            image: recipe.image,
-                            href: `/receitas/${recipe.id}`
-                        }));
-                        
-                        // Se não há receitas, mantém os dados mocados
-                        setRecipes(fetchedRecipes.length > 0 ? fetchedRecipes : sampleData);
-                    }
-                }
+                const fetchedRecipes = (data.data || []).map((recipe) => ({
+                    id: recipe.id,
+                    title: recipe.title,
+                    image: recipe.image,
+                    href: `/receitas/${recipe.id}`
+                }));
+
+                // Se não há receitas, mantém os dados mocados
+                setRecipes(fetchedRecipes.length > 0 ? fetchedRecipes : sampleData);
             } catch (error) {
-                console.error('Erro ao buscar receitas mais votadas:', error);
+                if (!controller.signal.aborted) {
+                    console.error('Erro ao buscar receitas mais votadas:', error);
+                    setRecipes(sampleData);
+                }
             } finally {
-                setLoading(false);
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
             }
         };
 
         fetchMostVoted();
+
+        return () => {
+            controller.abort()
+        }
     }, []);
 
     if (loading) {

@@ -1,8 +1,6 @@
-import { NextResponse } from 'next/server';
-import { query } from '@/lib/database';
-import { uploadImage } from '@/lib/uploadImage';
-
-const json = (body: unknown, status = 200) => NextResponse.json(body, { status });
+﻿import { query } from '@/lib/database'
+import { uploadImage } from '@/lib/uploadImage'
+import { assertString, handleApiError, success, failure } from '@/lib/api-utils'
 
 const MSG = {
     SUCCESS: 'Receita criada com sucesso',
@@ -12,28 +10,28 @@ const MSG = {
     INVALID_AUTHOR: 'Author ID é obrigatório',
     INVALID_IMAGE: 'Falha ao processar imagem',
     SERVER_ERROR: 'Erro interno do servidor',
-} as const;
+} as const
 
 interface DatabaseRecipe {
-    id: number | string;
-    titulo: string;
-    ingredientes: string;
-    modo: string;
-    tempo?: string | null;
-    rendimento?: string | null;
-    categoria?: string | null;
-    observacoes?: string | null;
-    imagem_url?: string | null;
-    author_id?: string | null;
-    created_at?: string;
+    id: number | string
+    titulo: string
+    ingredientes: string
+    modo: string
+    tempo?: string | null
+    rendimento?: string | null
+    categoria?: string | null
+    observacoes?: string | null
+    imagem_url?: string | null
+    author_id?: string | null
+    created_at?: string
 }
 
 async function parseRequest(request: Request) {
-    const contentType = request.headers.get('content-type') || '';
+    const contentType = request.headers.get('content-type') || ''
 
     if (contentType.includes('multipart/form-data')) {
-        const form = await request.formData();
-        const file = form.get('imagem') as File | null;
+        const form = await request.formData()
+        const file = form.get('imagem') as File | null
         return {
             titulo: String(form.get('titulo') || '').trim(),
             ingredientes: String(form.get('ingredientes') || '').trim(),
@@ -44,10 +42,10 @@ async function parseRequest(request: Request) {
             observacoes: String(form.get('observacoes') || '').trim() || null,
             authorId: String(form.get('authorId') || '').trim() || null,
             imagemFile: file && file.size > 0 ? file : null,
-        };
+        }
     }
 
-    const body = await request.json().catch(() => ({}));
+    const body = await request.json().catch(() => ({}))
     return {
         titulo: String(body.titulo || body.title || '').trim(),
         ingredientes: String(body.ingredientes || body.ingredients || '').trim(),
@@ -58,25 +56,25 @@ async function parseRequest(request: Request) {
         observacoes: String(body.observacoes || '').trim() || null,
         authorId: String(body.authorId || '').trim() || null,
         imagemFile: null,
-    };
+    }
 }
 
 export async function GET(request: Request) {
     try {
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get('userId');
+        const { searchParams } = new URL(request.url)
+        const userId = searchParams.get('userId')
 
-        let queryText = 'SELECT id, titulo, ingredientes, modo, tempo, rendimento, categoria, observacoes, imagem_url, author_id, created_at FROM receitas';
-        const queryParams: string[] = [];
+        let queryText = 'SELECT id, titulo, ingredientes, modo, tempo, rendimento, categoria, observacoes, imagem_url, author_id, created_at FROM receitas'
+        const queryParams: string[] = []
 
         if (userId) {
-            queryText += ' WHERE author_id = $1';
-            queryParams.push(userId);
+            queryText += ' WHERE author_id = $1'
+            queryParams.push(userId)
         }
 
-        queryText += ' ORDER BY created_at DESC';
+        queryText += ' ORDER BY created_at DESC'
 
-        const result = await query(queryText, queryParams);
+        const result = await query(queryText, queryParams)
 
         const receitas = result.rows.map((r: DatabaseRecipe) => ({
             id: r.id,
@@ -90,12 +88,11 @@ export async function GET(request: Request) {
             imagemUrl: r.imagem_url || null,
             authorId: r.author_id || null,
             createdAt: r.created_at || null,
-        }));
+        }))
 
-        return json({ success: true, data: receitas });
-    } catch (err) {
-        console.error('Erro na rota GET /api/receitas:', err);
-        return json({ success: false, message: MSG.SERVER_ERROR }, 500);
+        return success(receitas)
+    } catch (error) {
+        return handleApiError(error, MSG.SERVER_ERROR, 'Erro na rota GET /api/receitas:')
     }
 }
 
@@ -111,38 +108,36 @@ export async function POST(request: Request) {
             observacoes,
             authorId,
             imagemFile,
-        } = await parseRequest(request);
+        } = await parseRequest(request)
 
-        // Validações
         if (!titulo || titulo.length < 2) {
-            return json({ success: false, message: MSG.INVALID_TITLE }, 400);
+            return failure(MSG.INVALID_TITLE, 400)
         }
         if (!ingredientes || ingredientes.length < 3) {
-            return json({ success: false, message: MSG.INVALID_INGREDIENTS }, 400);
+            return failure(MSG.INVALID_INGREDIENTS, 400)
         }
         if (!modo || modo.length < 3) {
-            return json({ success: false, message: MSG.INVALID_INSTRUCTIONS }, 400);
-        }
-        if (!authorId) {
-            return json({ success: false, message: MSG.INVALID_AUTHOR }, 400);
+            return failure(MSG.INVALID_INSTRUCTIONS, 400)
         }
 
-        let imagemUrl: string | null = null;
+        const authorIdValue = assertString(authorId, MSG.INVALID_AUTHOR)
+
+        let imagemUrl: string | null = null
         if (imagemFile) {
             try {
-                imagemUrl = await uploadImage(imagemFile, "imagens-de-receitas");
+                imagemUrl = await uploadImage(imagemFile, 'imagens-de-receitas')
             } catch (err) {
-                console.error('Erro ao fazer upload da imagem:', err);
-                return json({ success: false, message: MSG.INVALID_IMAGE }, 400);
+                console.error('Erro ao fazer upload da imagem:', err)
+                return failure(MSG.INVALID_IMAGE, 400)
             }
         }
 
         const res = await query(
             `INSERT INTO receitas (titulo, ingredientes, modo, tempo, rendimento, categoria, observacoes, imagem_url, author_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id, titulo, ingredientes, modo, tempo, rendimento, categoria, observacoes, imagem_url, created_at`,
-            [titulo, ingredientes, modo, tempo, rendimento, categoria, observacoes, imagemUrl, authorId]
-        );
+            [titulo, ingredientes, modo, tempo, rendimento, categoria, observacoes, imagemUrl, authorIdValue]
+        )
 
-        const r: DatabaseRecipe = res.rows[0];
+        const r: DatabaseRecipe = res.rows[0]
         const safeRecipe = {
             id: r.id,
             titulo: r.titulo,
@@ -154,11 +149,10 @@ export async function POST(request: Request) {
             observacoes: r.observacoes || null,
             imagemUrl: r.imagem_url || null,
             createdAt: r.created_at || null,
-        };
+        }
 
-        return json({ success: true, message: MSG.SUCCESS, data: safeRecipe }, 201);
-    } catch (err) {
-        console.error('Erro na rota POST /api/receitas:', err);
-        return json({ success: false, message: MSG.SERVER_ERROR }, 500);
+        return success(safeRecipe, MSG.SUCCESS, 201)
+    } catch (error) {
+        return handleApiError(error, MSG.SERVER_ERROR, 'Erro na rota POST /api/receitas:')
     }
 }

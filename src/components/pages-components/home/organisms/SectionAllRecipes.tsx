@@ -8,6 +8,7 @@ import RecipeCard from '../molecules/RecipeCard'
 import { RecipeEmptyState, RecipeErrorState, RecipeLoadingGrid } from '@/components/pages-components/perfil/shared/RecipeListFeedback'
 import { useRecipes } from '@/hooks/useRecipes'
 import { filterRecipes } from '@/lib/recipe-utils'
+import { parseDurationToMinutes } from '@/lib/time-parser'
 import type { Recipe } from '@/types/recipe'
 
 const FILTER_FIELDS: Array<keyof Recipe> = ['titulo', 'ingredientes', 'categoria', 'modo']
@@ -17,14 +18,6 @@ function normalizeValue(value: string) {
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
-}
-
-function parseMinutes(value?: string | null) {
-    if (!value) return null
-    const match = value.match(/\d+/)
-    if (!match) return null
-    const minutes = Number(match[0])
-    return Number.isNaN(minutes) ? null : minutes
 }
 
 function getTimeBucket(minutes: number | null) {
@@ -62,7 +55,7 @@ function buildTimeGroup(recipes: Recipe[]): FilterGroup | null {
     let hasMissing = false
 
     recipes.forEach((recipe) => {
-        const minutes = parseMinutes(recipe.tempo)
+        const minutes = parseDurationToMinutes(recipe.tempo)
         const bucket = getTimeBucket(minutes)
         if (!bucket) {
             hasMissing = true
@@ -77,7 +70,7 @@ function buildTimeGroup(recipes: Recipe[]): FilterGroup | null {
         .map(([id, value]) => ({ id, label: value.label, count: value.count }))
 
     if (hasMissing) {
-        items.push({ id: 'sem-tempo', label: 'Sem informacao', count: recipes.filter((r) => !parseMinutes(r.tempo)).length })
+        items.push({ id: 'sem-tempo', label: 'Sem informacao', count: recipes.filter((r) => !parseDurationToMinutes(r.tempo)).length })
     }
 
     if (items.length === 0) return null
@@ -103,7 +96,7 @@ function applyFilters(recipes: Recipe[], filters: SelectedFilters, groups: Filte
             }
 
             if (group.id === 'tempo') {
-                const minutes = parseMinutes(recipe.tempo)
+                const minutes = parseDurationToMinutes(recipe.tempo)
                 const bucket = getTimeBucket(minutes)
                 if (!bucket) return selected.has('sem-tempo')
                 return selected.has(bucket)
@@ -231,4 +224,5 @@ export default function AllRecipes() {
         </section>
 
     )
-}
+}
+

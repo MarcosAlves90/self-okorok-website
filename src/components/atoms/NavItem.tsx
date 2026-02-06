@@ -6,7 +6,7 @@ import Link from 'next/link';
 type NavItemProps = {
     href: string;
     label: string;
-    scrolled: boolean;
+    scrolled?: boolean;
     ariaLabel?: string;
 };
 

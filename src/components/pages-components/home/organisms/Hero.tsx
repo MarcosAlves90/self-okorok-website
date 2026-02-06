@@ -1,6 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactElement } from "react";
+
+import CloudinaryImage from "@/components/shared/CloudinaryImage";
+import { CLOUDINARY_ASSETS } from "@/lib/cloudinary";
 
 export default function Hero(): ReactElement {
     return (
@@ -9,11 +11,13 @@ export default function Hero(): ReactElement {
             role="region"
             aria-label="Área de destaque"
         >
-            <Image
-                src="https://res.cloudinary.com/dyenpzpcr/image/upload/v1755488141/hero-background_vmw9cp.png"
+            <CloudinaryImage
+                publicId={CLOUDINARY_ASSETS.heroBackground}
                 alt=""
                 fill
                 priority
+                sizes="100vw"
+                transformation={{ width: 2500 }}
                 className="absolute inset-0 object-cover z-[1]"
             />
             <div className="absolute inset-0 z-[2] bg-gradient-to-b from-black/70 via-black/45 to-black/30" aria-hidden="true" />
@@ -56,12 +60,13 @@ export default function Hero(): ReactElement {
 
                 <div className="flex w-full flex-1 items-center justify-center lg:justify-end">
                     <div className="relative">
-                        <Image
-                            src="https://res.cloudinary.com/dyenpzpcr/image/upload/v1755488143/hero-highlight_ydet61.png"
+                        <CloudinaryImage
+                            publicId={CLOUDINARY_ASSETS.heroHighlight}
                             alt="Ilustração em destaque relacionada às receitas"
                             width={600}
                             height={600}
                             sizes="(min-width: 1024px) 34rem, (min-width: 640px) 24rem, 18rem"
+                            transformation={{ width: 1400 }}
                             className="h-auto w-[16rem] sm:w-[24rem] lg:w-[34rem] drop-shadow-[0_24px_40px_rgba(0,0,0,0.35)]"
                             priority
                         />

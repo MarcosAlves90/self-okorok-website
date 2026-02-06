@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import LoginForm from "@/components/pages-components/login/organisms/LoginForm";
+import CloudinaryImage from "@/components/shared/CloudinaryImage";
+import { CLOUDINARY_ASSETS } from "@/lib/cloudinary";
 
 export const metadata: Metadata = {
     title: "Login",
@@ -11,11 +12,13 @@ export default function Login() {
         <main className="min-h-[calc(100vh-82px)] mt-[82px] flex justify-center items-center py-10 sm:py-16 lg:py-20 px-[var(--pc-padding)]">
             <div className="border-2 border-foreground px-0 py-0 max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 rounded-xl overflow-hidden text-foreground bg-background">
                 <div className="relative hidden lg:flex items-center justify-center bg-foreground text-background min-h-[32rem]">
-                    <Image
-                        src="https://res.cloudinary.com/dyenpzpcr/image/upload/v1755488141/hero-background_vmw9cp.png"
+                    <CloudinaryImage
+                        publicId={CLOUDINARY_ASSETS.heroBackground}
                         alt=""
                         fill
                         priority
+                        sizes="(min-width: 1024px) 45vw, 100vw"
+                        transformation={{ width: 2000 }}
                         className="object-cover opacity-30"
                     />
                     <div className="relative z-[1] px-10 text-center space-y-4">

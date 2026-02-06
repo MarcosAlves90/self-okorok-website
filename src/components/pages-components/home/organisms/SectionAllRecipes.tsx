@@ -231,4 +231,4 @@ export default function AllRecipes() {
         </section>
 
     )
-}
+}

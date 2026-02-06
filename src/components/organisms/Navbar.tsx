@@ -8,6 +8,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { useUser } from '@/hooks/UserContext';
 import NavItem from '@/components/atoms/NavItem';
+import ThemeToggle from '@/components/atoms/ThemeToggle';
 
 export default function Navbar(): React.ReactElement {
     const pathname = usePathname();
@@ -15,7 +16,6 @@ export default function Navbar(): React.ReactElement {
     const { user } = useUser();
     const isLogged = !!user;
 
-    const [scrolled, setScrolled] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -42,18 +42,6 @@ export default function Navbar(): React.ReactElement {
         setSearchQuery(''); // Limpa o campo de busca.
     };
     
-    // 'scrolled' é sempre true se não estiver na home
-    useEffect(() => {
-        if (pathname && pathname !== '/') {
-            setScrolled(true);
-            return;
-        }
-        const onScroll = () => setScrolled(window.scrollY > 10);
-        onScroll();
-        window.addEventListener('scroll', onScroll, { passive: true });
-        return () => window.removeEventListener('scroll', onScroll);
-    }, [pathname]);
-
     useEffect(() => {
         setMenuOpen(false);
     }, [pathname]);
@@ -67,10 +55,10 @@ export default function Navbar(): React.ReactElement {
         };
     }, [menuOpen]);
 
-    const navClass = `py-3 px-[var(--pc-padding)] fixed w-full top-0 right-0 left-0 z-50 text-xs md:text-sm lg:text-base transition-all duration-200 ease-in-out border-b-2 ${scrolled ? 'bg-background/70 backdrop-blur-2xl text-foreground border-foreground' : 'bg-transparent text-background border-background/5'}`;
-    const accountBtnClass = `py-1 font-medium px-3 sm:px-4 rounded-md cursor-pointer text-xs md:text-sm lg:text-base transition-colors duration-300 ease-in-out ${scrolled ? 'bg-foreground text-background hover:bg-foreground/30 hover:text-foreground' : 'text-foreground bg-background hover:bg-foreground hover:text-background'}`;
-    const searchInputClass = `transition-all duration-300 ease-in-out text-sm rounded-md h-8 bg-transparent outline-none focus:ring-0 border-2 ${scrolled ? 'border-foreground text-foreground' : 'border-background/20 text-background'} ${searchOpen ? 'w-40 sm:w-48 px-3' : 'w-0 px-0 invisible opacity-0'} overflow-hidden`;
-    const searchIconClass = `${scrolled ? 'text-foreground' : 'text-background'} transition-colors duration-300 ease-in-out cursor-pointer`;
+    const navClass = `py-3 px-[var(--pc-padding)] fixed w-full top-0 right-0 left-0 z-50 text-xs md:text-sm lg:text-base transition-all duration-200 ease-in-out border-b-2 bg-background/70 backdrop-blur-2xl text-foreground border-foreground`;
+    const accountBtnClass = `py-1 font-medium px-3 sm:px-4 rounded-md cursor-pointer text-xs md:text-sm lg:text-base transition-colors duration-300 ease-in-out bg-foreground text-background hover:bg-foreground/30 hover:text-foreground`;
+    const searchInputClass = `transition-all duration-300 ease-in-out text-sm rounded-md h-8 bg-transparent outline-none focus:ring-0 border-2 border-foreground text-foreground ${searchOpen ? 'w-40 sm:w-48 px-3' : 'w-0 px-0 invisible opacity-0'} overflow-hidden`;
+    const searchIconClass = `text-foreground transition-colors duration-300 ease-in-out cursor-pointer`;
 
     const navItems = [
         ['/', 'Início'],
@@ -94,7 +82,7 @@ export default function Navbar(): React.ReactElement {
                     <div className="hidden md:flex flex-1 items-center justify-center">
                         <ul className="flex flex-row items-center gap-8" role="list" aria-label="Menu principal">
                             {navItems.map(([href, label]) => (
-                                <NavItem key={href} href={href} label={label} scrolled={scrolled} ariaLabel={label} />
+                                <NavItem key={href} href={href} label={label} ariaLabel={label} />
                             ))}
                         </ul>
                     </div>
@@ -145,6 +133,10 @@ export default function Navbar(): React.ReactElement {
                             </button>
                         </form>
 
+                        <div className="hidden md:inline-flex">
+                            <ThemeToggle />
+                        </div>
+
                         <button
                             type="button"
                             onClick={toggleMenu}
@@ -175,7 +167,7 @@ export default function Navbar(): React.ReactElement {
                             <span className="font-medium">Menu</span>
                         </div>
                         <nav aria-label="Menu mobile">
-                            <div className="p-3">
+                            <div className="p-3 space-y-3">
                                 <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
                                     <input
                                         value={searchQuery}
@@ -194,6 +186,10 @@ export default function Navbar(): React.ReactElement {
                                         <Search size={18} aria-hidden="true" />
                                     </button>
                                 </form>
+                                <div className="flex items-center justify-between rounded-lg border border-foreground/20 px-3 py-2">
+                                    <span className="text-xs font-medium text-foreground">Tema</span>
+                                    <ThemeToggle />
+                                </div>
                             </div>
                             <div className="px-3 pb-2">
                                 <button

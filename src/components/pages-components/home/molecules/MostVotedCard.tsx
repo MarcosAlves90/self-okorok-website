@@ -25,15 +25,15 @@ export default function MostVotedCard({ imageSrc, title, href = "#" }: Props) {
 
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-foreground/85" />
 
-                    <div className="absolute inset-0 p-3 flex flex-col justify-between">
+                    <div className="recipe-card-content absolute inset-0 p-3 flex flex-col justify-between">
                         <div className="flex justify-end">
-                            <div className="bg-foreground rounded px-2 py-1 text-xs text-background">
+                            <div className="bg-foreground rounded px-2 py-1 text-xs">
                                 ⭐ Mais Votada
                             </div>
                         </div>
 
                         <div className="space-y-1">
-                            <h3 className="text-white font-semibold text-sm line-clamp-2 leading-tight">
+                            <h3 className="font-semibold text-sm line-clamp-2 leading-tight">
                                 {title}
                             </h3>
                         </div>

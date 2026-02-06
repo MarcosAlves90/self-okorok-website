@@ -37,7 +37,7 @@ export default function RecipeCard({ recipe }: Props) {
 
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-foreground/85" />
 
-                    <div className="absolute inset-0 p-3 flex flex-col justify-between">
+                    <div className="recipe-card-content absolute inset-0 p-3 flex flex-col justify-between">
                         {recipe.categoria && (
                             <div className="flex justify-end">
                                 <div className="bg-foreground rounded px-2 py-1 text-xs text-background">
@@ -47,11 +47,11 @@ export default function RecipeCard({ recipe }: Props) {
                         )}
 
                         <div className="space-y-1">
-                            <h3 className="text-white font-semibold text-sm line-clamp-2 leading-tight">
+                            <h3 className="font-semibold text-sm line-clamp-2 leading-tight">
                                 {recipe.titulo}
                             </h3>
                             {recipe.tempo && (
-                                <div className="text-white/80 text-xs">
+                                <div className="text-xs opacity-80">
                                     Tempo: {recipe.tempo}
                                 </div>
                             )}
@@ -62,3 +62,4 @@ export default function RecipeCard({ recipe }: Props) {
         </Link>
     )
 }
+
